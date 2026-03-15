@@ -39,6 +39,8 @@ const DISTRICTS = [
   "Редукторный",
 ]
 
+const ALL_DISTRICTS_VALUE = "Все районы"
+
 const CAPACITY_MIN = 50
 const CAPACITY_MAX = 1000
 const PRICE_MIN = 500
@@ -61,16 +63,16 @@ const FiltersContent = ({ filters, onFiltersChange }: VenueFiltersProps) => {
       <div className="space-y-2">
         <Label>Район</Label>
         <Select
-          value={filters.district ?? "all"}
+          value={filters.district ?? ALL_DISTRICTS_VALUE}
           onValueChange={(v: string | null) =>
-            updateFilter("district", !v || v === "all" ? undefined : v)
+            updateFilter("district", !v || v === ALL_DISTRICTS_VALUE ? undefined : v)
           }
         >
           <SelectTrigger>
             <SelectValue placeholder="Все районы" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Все районы</SelectItem>
+            <SelectItem value={ALL_DISTRICTS_VALUE}>Все районы</SelectItem>
             {DISTRICTS.map((d) => (
               <SelectItem key={d} value={d}>
                 {d}

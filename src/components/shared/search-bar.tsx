@@ -22,6 +22,8 @@ const DISTRICTS = [
   "Редукторный",
 ];
 
+const ALL_DISTRICTS_VALUE = "Все районы";
+
 interface SearchBarProps {
   className?: string;
 }
@@ -29,12 +31,12 @@ interface SearchBarProps {
 export const SearchBar = ({ className }: SearchBarProps) => {
   const router = useRouter();
   const [guestCount, setGuestCount] = useState("");
-  const [district, setDistrict] = useState("all");
+  const [district, setDistrict] = useState(ALL_DISTRICTS_VALUE);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (guestCount) params.set("capacityMin", guestCount);
-    if (district && district !== "all") params.set("district", district);
+    if (district && district !== ALL_DISTRICTS_VALUE) params.set("district", district);
     router.push(`/venues?${params.toString()}`);
   };
 
@@ -54,13 +56,13 @@ export const SearchBar = ({ className }: SearchBarProps) => {
       />
       <Select
         value={district}
-        onValueChange={(v: string | null) => setDistrict(v ?? "all")}
+        onValueChange={(v: string | null) => setDistrict(v ?? ALL_DISTRICTS_VALUE)}
       >
         <SelectTrigger className="border-0 bg-surface-50 md:w-44">
           <SelectValue placeholder="Район" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Все районы</SelectItem>
+          <SelectItem value={ALL_DISTRICTS_VALUE}>Все районы</SelectItem>
           {DISTRICTS.map((d) => (
             <SelectItem key={d} value={d}>
               {d}

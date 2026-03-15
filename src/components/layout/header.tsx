@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useSession } from "next-auth/react"
-import { Button } from "@/components/ui/button"
-import { MobileNav } from "./mobile-nav"
-import { UserMenu } from "./user-menu"
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { MobileNav } from "./mobile-nav";
+import { UserMenu } from "./user-menu";
 
 export const Header = () => {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-surface-200 bg-white/80 backdrop-blur-md">
@@ -48,13 +48,16 @@ export const Header = () => {
                 className="bg-brand-500 hover:bg-brand-600"
                 render={<Link href="/register" />}
               >
-                Разместить зал
+                Зарегистрироваться
               </Button>
             </div>
           )}
-          <MobileNav isLoggedIn={!!session?.user} userRole={session?.user?.role} />
+          <MobileNav
+            isLoggedIn={!!session?.user}
+            userRole={session?.user?.role}
+          />
         </div>
       </div>
     </header>
-  )
-}
+  );
+};

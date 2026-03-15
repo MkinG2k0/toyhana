@@ -120,8 +120,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface-50 px-4">
-      <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="font-display text-2xl">Регистрация</CardTitle>
           <CardDescription>
@@ -157,12 +156,14 @@ export default function RegisterPage() {
                   onValueChange={(v) => setRole(v as "CLIENT" | "OWNER")}
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue>
+                      {role === "CLIENT" ? "Найти зал" : "Разместить зал"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="CLIENT">Найти зал</SelectItem>
                     <SelectItem value="OWNER">Разместить зал</SelectItem>
-                  </SelectContent>  
+                  </SelectContent>
                 </Select>
               </div>
               <Button
@@ -226,6 +227,5 @@ export default function RegisterPage() {
           )}
         </CardContent>
       </Card>
-    </div>
   )
 }

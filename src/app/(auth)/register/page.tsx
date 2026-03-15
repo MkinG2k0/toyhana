@@ -180,7 +180,7 @@ export default function RegisterPage() {
                   или
                 </span>
               </div>
-              <GoogleSignInButton disabled={isLoading} />
+              <GoogleSignInButton intentRole={role} disabled={isLoading} />
               <p className="text-center text-sm text-muted-foreground">
                 Уже есть аккаунт?{" "}
                 <Link href="/login" className="text-brand-500 hover:underline">

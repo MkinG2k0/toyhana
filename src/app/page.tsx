@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { SearchBar } from "@/components/shared/search-bar";
+import { PostRegisterRoleSync } from "@/components/shared/post-register-role-sync";
 import { VenueCard } from "@/components/venues/venue-card";
 import { prisma } from "@/lib/prisma";
 import {
@@ -87,11 +88,17 @@ const EVENT_TYPES = [
   },
 ];
 
-export default async function HomePage() {
+interface HomePageProps {
+  searchParams: Promise<{ fromRegister?: string | string[] }>;
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
   const topVenues = await getTopVenues();
+  const params = await searchParams;
 
   return (
     <>
+      <PostRegisterRoleSync fromRegister={params?.fromRegister} />
       <Header />
       <main>
         {/* Hero */}

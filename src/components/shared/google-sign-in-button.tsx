@@ -32,6 +32,8 @@ const GOOGLE_ICON = (
 
 interface GoogleSignInButtonProps {
   callbackUrl?: string
+  /** Роль при регистрации: при OWNER после входа пользователь попадёт на главную с ?fromRegister=OWNER и роль обновится */
+  intentRole?: "CLIENT" | "OWNER"
   disabled?: boolean
   className?: string
   children?: React.ReactNode
@@ -39,15 +41,19 @@ interface GoogleSignInButtonProps {
 
 export function GoogleSignInButton({
   callbackUrl = "/",
+  intentRole,
   disabled = false,
   className,
   children = "Войти через Google",
 }: GoogleSignInButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
 
+  const effectiveCallbackUrl =
+    intentRole === "OWNER" ? "/?fromRegister=OWNER" : callbackUrl
+
   const handleClick = () => {
     setIsLoading(true)
-    signIn("google", { callbackUrl })
+    signIn("google", { callbackUrl: effectiveCallbackUrl })
   }
 
   return (

@@ -1,0 +1,55 @@
+import { z } from "zod/v4"
+
+export const createBookingSchema = z.object({
+  venueId: z.string().min(1, "Не указан зал"),
+  eventDate: z.string().refine((d) => new Date(d) > new Date(), {
+    message: "Дата мероприятия должна быть в будущем",
+  }),
+  eventType: z.enum([
+    "WEDDING",
+    "ENGAGEMENT",
+    "BIRTHDAY",
+    "CORPORATE",
+    "FUNERAL",
+    "OTHER",
+  ]),
+  guestCount: z
+    .number()
+    .int()
+    .min(10, "Минимум 10 гостей")
+    .max(2000, "Максимум 2000 гостей"),
+  contactName: z.string().min(2, "Введите имя").max(100),
+  contactPhone: z
+    .string()
+    .regex(/^\+7\d{10}$/, "Формат: +7XXXXXXXXXX"),
+  message: z.string().max(1000).optional(),
+})
+
+export type CreateBookingInput = z.infer<typeof createBookingSchema>
+
+export const updateBookingStatusSchema = z.object({
+  status: z.enum(["CONFIRMED", "REJECTED", "CANCELLED"]),
+  message: z.string().max(500).optional(),
+})
+
+export type UpdateBookingStatusInput = z.infer<
+  typeof updateBookingStatusSchema
+>
+
+export const bookingListSchema = z.object({
+  status: z
+    .enum([
+      "PENDING",
+      "CONFIRMED",
+      "PREPAID",
+      "COMPLETED",
+      "CANCELLED",
+      "REJECTED",
+    ])
+    .optional(),
+  venueId: z.string().optional(),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+})
+
+export type BookingListParams = z.infer<typeof bookingListSchema>

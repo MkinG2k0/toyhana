@@ -21,7 +21,11 @@ declare module "next-auth" {
   }
 }
 
+const authSecret =
+  process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: authSecret,
   providers: [
     Credentials({
       id: "otp-login",

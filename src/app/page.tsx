@@ -1,12 +1,12 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Header } from "@/components/layout/header"
-import { Footer } from "@/components/layout/footer"
-import { SearchBar } from "@/components/shared/search-bar"
-import { VenueCard } from "@/components/venues/venue-card"
-import { prisma } from "@/lib/prisma"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { SearchBar } from "@/components/shared/search-bar";
+import { VenueCard } from "@/components/venues/venue-card";
+import { prisma } from "@/lib/prisma";
 import {
   Building2,
   Star,
@@ -16,11 +16,11 @@ import {
   PartyPopper,
   Cake,
   Briefcase,
-} from "lucide-react"
+} from "lucide-react";
 
-import type { VenueCard as VenueCardType } from "@/types/venue"
+import type { VenueCard as VenueCardType } from "@/types/venue";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
 const getTopVenues = async (): Promise<VenueCardType[]> => {
   try {
@@ -51,12 +51,12 @@ const getTopVenues = async (): Promise<VenueCardType[]> => {
           take: 1,
         },
       },
-    })
-    return venues
+    });
+    return venues;
   } catch {
-    return []
+    return [];
   }
-}
+};
 
 const BENEFITS = [
   {
@@ -74,7 +74,7 @@ const BENEFITS = [
     title: "Бронирование за 2 минуты",
     description: "Оставьте заявку онлайн — владелец зала свяжется с вами",
   },
-]
+];
 
 const EVENT_TYPES = [
   { label: "Свадьба", href: "/venues?eventType=WEDDING", icon: Heart },
@@ -85,10 +85,10 @@ const EVENT_TYPES = [
     href: "/venues?eventType=CORPORATE",
     icon: Briefcase,
   },
-]
+];
 
 export default async function HomePage() {
-  const topVenues = await getTopVenues()
+  const topVenues = await getTopVenues();
 
   return (
     <>
@@ -104,7 +104,7 @@ export default async function HomePage() {
             <p className="mt-4 text-lg text-white/80 md:text-xl">
               200+ банкетных залов Махачкалы и Дагестана
             </p>
-            <SearchBar className="mx-auto mt-8 max-w-2xl" />
+            <SearchBar className="mx-auto mt-8 max-w-md" />
           </div>
         </section>
 
@@ -191,5 +191,5 @@ export default async function HomePage() {
       </main>
       <Footer />
     </>
-  )
+  );
 }

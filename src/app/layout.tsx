@@ -1,9 +1,16 @@
-import { Golos_Text, Playfair_Display } from "next/font/google"
+import { Golos_Text, Playfair_Display, Roboto } from "next/font/google"
 import { Toaster } from "@/components/ui/sonner"
 import { Providers } from "@/providers"
 import "./globals.css"
 
 import type { Metadata } from "next"
+
+const roboto = Roboto({
+  variable: "--font-roboto",
+  weight: ["400", "500", "700"],
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+})
 
 const golosText = Golos_Text({
   variable: "--font-golos",
@@ -40,11 +47,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const fontVariables = `${golosText.variable} ${playfairDisplay.variable}`
+  const fontVariables = `${roboto.variable} ${golosText.variable} ${playfairDisplay.variable}`
 
   return (
     <html lang="ru" className={fontVariables} suppressHydrationWarning>
-      <body className="antialiased">
+      <body className="font-sans antialiased">
         <Providers>
           {children}
           <Toaster richColors position="top-center" />

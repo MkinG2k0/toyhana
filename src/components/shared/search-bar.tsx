@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Search } from "lucide-react"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/select";
+import { Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const DISTRICTS = [
   "Советский",
@@ -20,29 +20,29 @@ const DISTRICTS = [
   "Ленинский",
   "Ленинкент",
   "Редукторный",
-]
+];
 
 interface SearchBarProps {
-  className?: string
+  className?: string;
 }
 
 export const SearchBar = ({ className }: SearchBarProps) => {
-  const router = useRouter()
-  const [guestCount, setGuestCount] = useState("")
-  const [district, setDistrict] = useState("all")
+  const router = useRouter();
+  const [guestCount, setGuestCount] = useState("");
+  const [district, setDistrict] = useState("all");
 
   const handleSearch = () => {
-    const params = new URLSearchParams()
-    if (guestCount) params.set("capacityMin", guestCount)
-    if (district && district !== "all") params.set("district", district)
-    router.push(`/venues?${params.toString()}`)
-  }
+    const params = new URLSearchParams();
+    if (guestCount) params.set("capacityMin", guestCount);
+    if (district && district !== "all") params.set("district", district);
+    router.push(`/venues?${params.toString()}`);
+  };
 
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-2xl bg-white p-3 shadow-lg md:flex-row md:items-center md:gap-2 md:rounded-full md:p-2",
-        className
+        "flex flex-col gap-3 rounded-2xl text-black  bg-white p-3 shadow-lg md:flex-row md:items-center md:gap-2 md:rounded-full md:p-2",
+        className,
       )}
     >
       <Input
@@ -52,7 +52,10 @@ export const SearchBar = ({ className }: SearchBarProps) => {
         onChange={(e) => setGuestCount(e.target.value)}
         className="border-0 bg-surface-50 md:w-40"
       />
-      <Select value={district} onValueChange={(v: string | null) => setDistrict(v ?? "all")}>
+      <Select
+        value={district}
+        onValueChange={(v: string | null) => setDistrict(v ?? "all")}
+      >
         <SelectTrigger className="border-0 bg-surface-50 md:w-44">
           <SelectValue placeholder="Район" />
         </SelectTrigger>
@@ -74,5 +77,5 @@ export const SearchBar = ({ className }: SearchBarProps) => {
         Найти
       </Button>
     </div>
-  )
-}
+  );
+};

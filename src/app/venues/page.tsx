@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { useState, useCallback } from "react"
-import { Header } from "@/components/layout/header"
-import { Footer } from "@/components/layout/footer"
-import { VenueCard } from "@/components/venues/venue-card"
-import { VenueFilters } from "@/components/venues/venue-filters"
-import { EmptyState } from "@/components/shared/empty-state"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useState, useCallback } from "react";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { VenueCard } from "@/components/venues/venue-card";
+import { VenueFilters } from "@/components/venues/venue-filters";
+import { EmptyState } from "@/components/shared/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Pagination,
   PaginationContent,
@@ -21,11 +21,14 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
-import { useVenues } from "@/hooks/use-venues"
-import { pluralize } from "@/lib/utils"
+} from "@/components/ui/pagination";
+import { useVenues } from "@/hooks/use-venues";
+import { pluralize } from "@/lib/utils";
 
-import type { VenueFilters as VenueFiltersType, VenueSortOption } from "@/types/venue"
+import type {
+  VenueFilters as VenueFiltersType,
+  VenueSortOption,
+} from "@/types/venue";
 
 const SORT_OPTIONS: { value: VenueSortOption; label: string }[] = [
   { value: "popular", label: "Популярные" },
@@ -33,35 +36,35 @@ const SORT_OPTIONS: { value: VenueSortOption; label: string }[] = [
   { value: "price_asc", label: "Сначала дешевле" },
   { value: "price_desc", label: "Сначала дороже" },
   { value: "newest", label: "Новые" },
-]
+];
 
 export default function VenuesPage() {
   const [filters, setFilters] = useState<VenueFiltersType>({
     page: 1,
     sort: "popular",
-  })
+  });
 
-  const { data, isLoading } = useVenues(filters)
+  const { data, isLoading } = useVenues(filters);
 
   const handleFiltersChange = useCallback((newFilters: VenueFiltersType) => {
-    setFilters(newFilters)
-  }, [])
+    setFilters(newFilters);
+  }, []);
 
   const handleSortChange = useCallback(
     (sort: string | null) => {
-      if (!sort) return
-      setFilters({ ...filters, sort: sort as VenueSortOption, page: 1 })
+      if (!sort) return;
+      setFilters({ ...filters, sort: sort as VenueSortOption, page: 1 });
     },
-    [filters]
-  )
+    [filters],
+  );
 
   const handlePageChange = useCallback(
     (page: number) => {
-      setFilters({ ...filters, page })
-      window.scrollTo({ top: 0, behavior: "smooth" })
+      setFilters({ ...filters, page });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     },
-    [filters]
-  )
+    [filters],
+  );
 
   return (
     <>
@@ -77,27 +80,6 @@ export default function VenuesPage() {
                 {pluralize(data.total, "зал", "зала", "залов")}
               </p>
             )}
-          </div>
-          <div className="flex items-center gap-3">
-            <VenueFilters
-              filters={filters}
-              onFiltersChange={handleFiltersChange}
-            />
-            <Select
-              value={filters.sort ?? "popular"}
-              onValueChange={handleSortChange}
-            >
-              <SelectTrigger className="w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SORT_OPTIONS.map((o) => (
-                  <SelectItem key={o.value} value={o.value}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
         </div>
 
@@ -140,7 +122,7 @@ export default function VenuesPage() {
                           (p) =>
                             p === 1 ||
                             p === data.totalPages ||
-                            Math.abs(p - data.page) <= 2
+                            Math.abs(p - data.page) <= 2,
                         )
                         .map((p) => (
                           <PaginationItem key={p}>
@@ -176,7 +158,7 @@ export default function VenuesPage() {
       </main>
       <Footer />
     </>
-  )
+  );
 }
 
 const VenueCardSkeleton = () => (
@@ -192,4 +174,4 @@ const VenueCardSkeleton = () => (
       <Skeleton className="h-6 w-24" />
     </div>
   </div>
-)
+);

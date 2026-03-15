@@ -1,10 +1,13 @@
 import { PrismaClient } from "../../generated/prisma/client"
 import { PrismaPg } from "@prisma/adapter-pg"
 
+import { normalizeDatabaseUrl } from "@/lib/database-url"
+
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 
 const createPrismaClient = () => {
-  const connectionString = process.env.DATABASE_URL ?? ""
+  const raw = process.env.DATABASE_URL ?? ""
+  const connectionString = normalizeDatabaseUrl(raw)
   const adapter = new PrismaPg({ connectionString })
   return new PrismaClient({ adapter })
 }

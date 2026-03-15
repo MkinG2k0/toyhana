@@ -1,6 +1,16 @@
-import { PrismaClient } from "../generated/prisma/client"
+import { PrismaClient } from "../generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const prisma = new PrismaClient()
+const createPrismaClient = () => {
+  const raw = process.env.DATABASE_URL ?? "";
+
+  const adapter = new PrismaPg({
+    connectionString:
+      "postgres://34bfca585dcfa47b923924b9c92936daec3494586dd993ba272879dacf53a9a9:sk_xEpGmJyxRqS5y3_tIGtcU@db.prisma.io:5432/postgres?sslmode=require",
+  });
+  return new PrismaClient({ adapter });
+};
+const prisma = createPrismaClient();
 
 const VENUES_DATA = [
   {
@@ -133,7 +143,7 @@ const VENUES_DATA = [
     isVerified: true,
     isPremium: false,
   },
-]
+];
 
 const PLACEHOLDER_PHOTOS = [
   "/images/placeholder/venue-1.jpg",
@@ -141,13 +151,13 @@ const PLACEHOLDER_PHOTOS = [
   "/images/placeholder/venue-3.jpg",
   "/images/placeholder/venue-4.jpg",
   "/images/placeholder/venue-5.jpg",
-]
+];
 
 const REVIEW_TEXTS = [
   "Прекрасный зал! Провели свадьбу на 400 гостей, все остались довольны. Кухня выше всяких похвал, обслуживание на высшем уровне.",
   "Хороший зал, но парковка могла бы быть побольше. В остальном всё отлично — вкусная еда, красивый интерьер.",
   "Очень рекомендую! Отмечали помолвку, всё было организовано идеально. Персонал внимательный и вежливый.",
-]
+];
 
 const REVIEWER_NAMES = [
   "Магомед",
@@ -156,10 +166,10 @@ const REVIEWER_NAMES = [
   "Хадижат",
   "Расул",
   "Аминат",
-]
+];
 
 async function main() {
-  console.info("Seeding database...")
+  console.info("Seeding database...");
 
   const owner = await prisma.user.upsert({
     where: { phone: "+79280000001" },
@@ -169,7 +179,7 @@ async function main() {
       name: "Магомед Исмаилов",
       role: "OWNER",
     },
-  })
+  });
 
   const clients = await Promise.all(
     REVIEWER_NAMES.map((name, i) =>
@@ -181,9 +191,9 @@ async function main() {
           name,
           role: "CLIENT",
         },
-      })
-    )
-  )
+      }),
+    ),
+  );
 
   for (const venueData of VENUES_DATA) {
     const venue = await prisma.venue.upsert({
@@ -194,11 +204,11 @@ async function main() {
         ownerId: owner.id,
         allowOwnFruits: true,
       },
-    })
+    });
 
     const existingPhotos = await prisma.venuePhoto.count({
       where: { venueId: venue.id },
-    })
+    });
 
     if (existingPhotos === 0) {
       await prisma.venuePhoto.createMany({
@@ -209,17 +219,17 @@ async function main() {
           order: index,
           isMain: index === 0,
         })),
-      })
+      });
     }
 
     const existingReviews = await prisma.review.count({
       where: { venueId: venue.id },
-    })
+    });
 
     if (existingReviews === 0) {
-      const reviewCount = Math.min(3, clients.length)
+      const reviewCount = Math.min(3, clients.length);
       for (let i = 0; i < reviewCount; i++) {
-        const rating = 4 + Math.round(Math.random())
+        const rating = 4 + Math.round(Math.random());
         await prisma.review.create({
           data: {
             venueId: venue.id,
@@ -231,16 +241,16 @@ async function main() {
             ambienceRating: 4 + Math.round(Math.random()),
             isModerated: true,
           },
-        })
+        });
       }
 
       const reviews = await prisma.review.findMany({
         where: { venueId: venue.id },
         select: { rating: true },
-      })
+      });
 
       const avg =
-        reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 
       await prisma.venue.update({
         where: { id: venue.id },
@@ -249,18 +259,18 @@ async function main() {
           reviewCount: reviews.length,
           viewCount: 100 + Math.floor(Math.random() * 500),
         },
-      })
+      });
     }
   }
 
-  console.info("Seed completed successfully!")
+  console.info("Seed completed successfully!");
 }
 
 main()
   .catch((e) => {
-    console.error("Seed failed:", e)
-    process.exit(1)
+    console.error("Seed failed:", e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });

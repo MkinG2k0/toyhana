@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
         hostname: "storage.yandexcloud.net",
         pathname: "/**",
       },
+      // Временно: любые домены (убрать перед продом)
+      { protocol: "https", hostname: "**", pathname: "/**" },
+      { protocol: "http", hostname: "**", pathname: "/**" },
     ],
   },
 };

@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { PhoneInput } from "@/components/shared/phone-input"
+import { GoogleSignInButton } from "@/components/shared/google-sign-in-button"
 import { toast } from "sonner"
 
 type Step = "info" | "otp"
@@ -161,7 +162,7 @@ export default function RegisterPage() {
                   <SelectContent>
                     <SelectItem value="CLIENT">Найти зал</SelectItem>
                     <SelectItem value="OWNER">Разместить зал</SelectItem>
-                  </SelectContent>
+                  </SelectContent>  
                 </Select>
               </div>
               <Button
@@ -171,6 +172,15 @@ export default function RegisterPage() {
               >
                 {isLoading ? "Отправка..." : "Получить код"}
               </Button>
+              <div className="relative">
+                <span className="absolute inset-0 flex items-center" aria-hidden>
+                  <span className="w-full border-t border-surface-300" />
+                </span>
+                <span className="relative flex justify-center text-xs uppercase text-muted-foreground">
+                  или
+                </span>
+              </div>
+              <GoogleSignInButton disabled={isLoading} />
               <p className="text-center text-sm text-muted-foreground">
                 Уже есть аккаунт?{" "}
                 <Link href="/login" className="text-brand-500 hover:underline">

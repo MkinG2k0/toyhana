@@ -1,12 +1,15 @@
 import NextAuth from "next-auth"
+import "next-auth/jwt"
 import Credentials from "next-auth/providers/credentials"
+import Google from "next-auth/providers/google"
 
 import type { UserRole } from "@/types/user"
 
 declare module "next-auth" {
   interface User {
     id?: string
-    phone?: string
+    phone?: string | null
+    email?: string | null
     name?: string | null
     role?: UserRole
   }
@@ -14,19 +17,43 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string
-      phone: string
+      phone?: string | null
+      email?: string | null
       name: string
       role: UserRole
     }
   }
 }
 
+declare module "next-auth/jwt" {
+  interface JWT {
+    id?: string
+    phone?: string | null
+    email?: string | null
+    role?: UserRole
+  }
+}
+
 const authSecret =
   process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: authSecret,
   providers: [
+    ...(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET
+      ? [
+          Google({
+            clientId: GOOGLE_CLIENT_ID,
+            clientSecret: GOOGLE_CLIENT_SECRET,
+            authorization: {
+              params: { prompt: "consent" },
+            },
+          }),
+        ]
+      : []),
     Credentials({
       id: "otp-login",
       name: "OTP Login",
@@ -42,26 +69,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const { prisma } = await import("@/lib/prisma")
 
-        const storedOtp = await prisma.$queryRaw<
-          { code: string; expires_at: Date }[]
-        >`SELECT code, expires_at FROM otp_codes WHERE phone = ${phone} ORDER BY created_at DESC LIMIT 1`
+        const storedOtp = await prisma.otpCode.findFirst({
+          where: { phone },
+          orderBy: { createdAt: 'desc' },
+          select: { code: true, expiresAt: true },
+        })
 
         if (
-          !storedOtp.length ||
-          storedOtp[0].code !== code ||
-          storedOtp[0].expires_at < new Date()
+          !storedOtp ||
+          storedOtp.code !== code ||
+          storedOtp.expiresAt < new Date()
         ) {
           return null
         }
 
-        await prisma.$executeRaw`DELETE FROM otp_codes WHERE phone = ${phone}`
+        await prisma.otpCode.deleteMany({ where: { phone } })
 
         const user = await prisma.user.findUnique({ where: { phone } })
         if (!user) return null
 
         return {
           id: user.id,
-          phone: user.phone,
+          phone: user.phone ?? undefined,
           name: user.name,
           role: user.role as UserRole,
         }
@@ -73,18 +102,54 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
   },
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      if (user && account?.provider === "google") {
+        const { prisma } = await import("@/lib/prisma")
+        const email = user.email ?? null
+        const name = user.name ?? "Пользователь"
+        const image = user.image ?? null
+        if (!email) return token
+
+        const dbUser = await prisma.user.upsert({
+          where: { email },
+          update: {
+            name,
+            avatar: image,
+          },
+          create: {
+            email,
+            name,
+            avatar: image,
+            role: "CLIENT",
+          },
+        })
+
+        token.id = dbUser.id
+        token.phone = dbUser.phone ?? null
+        token.email = dbUser.email ?? null
+        token.role = dbUser.role
+        return token
+      }
       if (user) {
         token.id = user.id
-        token.phone = user.phone
+        token.phone = user.phone ?? null
+        token.email = null
         token.role = user.role
       }
       return token
     },
     session({ session, token }) {
-      session.user.id = token.id as string
-      session.user.phone = token.phone as string
-      session.user.role = token.role as UserRole
+      const u = session.user as {
+        id: string
+        phone?: string | null
+        email?: string | null
+        name: string
+        role: UserRole
+      }
+      u.id = token.id as string
+      u.phone = (token.phone as string | null) ?? undefined
+      u.email = (token.email as string | null) ?? undefined
+      u.role = token.role as UserRole
       return session
     },
   },

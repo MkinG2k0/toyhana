@@ -36,7 +36,7 @@ const getVenue = async (slug: string) => {
     },
     include: {
       photos: { orderBy: { order: "asc" } },
-      owner: { select: { id: true, name: true, phone: true } },
+      owner: { select: { id: true, name: true, phone: true, email: true } },
       blockedDates: { select: { date: true } },
       reviews: {
         include: {
@@ -267,8 +267,10 @@ export default async function VenueDetailPage({ params }: PageProps) {
               <div className="space-y-2 text-sm">
                 <p className="font-medium">Контакт владельца</p>
                 <p className="flex items-center gap-2 text-muted-foreground">
-                  <Phone className="size-4" />
-                  {formatPhone(venue.owner.phone)}
+                  <Phone className="size-4 shrink-0" />
+                  {venue.owner.phone
+                    ? formatPhone(venue.owner.phone)
+                    : venue.owner.email ?? "—"}
                 </p>
               </div>
             </div>

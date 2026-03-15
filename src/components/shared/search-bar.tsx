@@ -41,7 +41,7 @@ export const SearchBar = ({ className }: SearchBarProps) => {
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-2xl text-black  bg-white p-3 shadow-lg md:flex-row md:items-center md:gap-2 md:rounded-full md:p-2",
+        "flex gap-3 rounded-2xl text-black  bg-white p-3 shadow-lg md:items-center md:gap-2 md:rounded-full md:p-2",
         className,
       )}
     >

@@ -18,15 +18,15 @@ export async function POST(req: NextRequest) {
 
     const { phone } = parsed.data
 
-    const recent = await prisma.$queryRaw<{ created_at: Date }[]>`
-      SELECT created_at FROM otp_codes 
-      WHERE phone = ${phone} 
-      ORDER BY created_at DESC LIMIT 1
-    `
+    const recent = await prisma.otpCode.findFirst({
+      where: { phone },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    })
 
-    if (recent.length > 0) {
+    if (recent) {
       const elapsed =
-        (Date.now() - new Date(recent[0].created_at).getTime()) / 1000
+        (Date.now() - recent.createdAt.getTime()) / 1000
       if (elapsed < OTP_COOLDOWN_SECONDS) {
         return error(
           `Подождите ${Math.ceil(OTP_COOLDOWN_SECONDS - elapsed)} секунд перед повторной отправкой`,
@@ -38,11 +38,10 @@ export async function POST(req: NextRequest) {
     const code = generateOtpCode()
     const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000)
 
-    await prisma.$executeRaw`DELETE FROM otp_codes WHERE phone = ${phone}`
-    await prisma.$executeRaw`
-      INSERT INTO otp_codes (phone, code, expires_at, created_at) 
-      VALUES (${phone}, ${code}, ${expiresAt}, NOW())
-    `
+    await prisma.otpCode.deleteMany({ where: { phone } })
+    await prisma.otpCode.create({
+      data: { phone, code, expiresAt },
+    })
 
     const result = await sendOtp(phone, code)
 

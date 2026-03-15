@@ -7,7 +7,8 @@ import type { NextResponse } from "next/server"
 interface AuthSuccess {
   user: {
     id: string
-    phone: string
+    phone?: string | null
+    email?: string | null
     name: string
     role: UserRole
   }

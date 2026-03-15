@@ -19,19 +19,21 @@ export async function POST(req: NextRequest) {
       return error("Пользователь с таким номером уже зарегистрирован")
     }
 
-    const storedOtp = await prisma.$queryRaw<
-      { code: string; expires_at: Date }[]
-    >`SELECT code, expires_at FROM otp_codes WHERE phone = ${phone} ORDER BY created_at DESC LIMIT 1`
+    const storedOtp = await prisma.otpCode.findFirst({
+      where: { phone },
+      orderBy: { createdAt: 'desc' },
+      select: { code: true, expiresAt: true },
+    })
 
     if (
-      !storedOtp.length ||
-      storedOtp[0].code !== code ||
-      storedOtp[0].expires_at < new Date()
+      !storedOtp ||
+      storedOtp.code !== code ||
+      storedOtp.expiresAt < new Date()
     ) {
       return error("Неверный или просроченный код")
     }
 
-    await prisma.$executeRaw`DELETE FROM otp_codes WHERE phone = ${phone}`
+    await prisma.otpCode.deleteMany({ where: { phone } })
 
     const user = await prisma.user.create({
       data: { phone, name, role },

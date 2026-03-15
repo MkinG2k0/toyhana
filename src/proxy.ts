@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server"
+import type { NextFetchEvent, NextRequest } from "next/server"
 import { auth } from "@/lib/auth"
+
+type MiddlewareHandler = (
+  request: NextRequest,
+  event: NextFetchEvent
+) => ReturnType<ReturnType<typeof auth>>
 
 const PROTECTED_ROUTES = ["/dashboard", "/booking"]
 const OWNER_ROUTES = ["/dashboard"]
 const AUTH_ROUTES = ["/login", "/register"]
 
-export default auth((req) => {
+const withAuth = auth((req) => {
   const { pathname } = req.nextUrl
   const isLoggedIn = !!req.auth?.user
   const userRole = (req.auth?.user as { role?: string } | undefined)?.role
@@ -30,6 +36,10 @@ export default auth((req) => {
 
   return NextResponse.next()
 })
+
+export function proxy(request: NextRequest, event: NextFetchEvent) {
+  return (withAuth as unknown as MiddlewareHandler)(request, event)
+}
 
 export const config = {
   matcher: [

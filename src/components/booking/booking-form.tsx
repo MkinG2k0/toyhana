@@ -1,35 +1,39 @@
-"use client"
+"use client";
 
-import { useForm, Controller } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
+import { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
-import { createBookingSchema, type CreateBookingInput } from "@/validators/booking"
-import { useCreateBooking } from "@/hooks/use-bookings"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Calendar } from "@/components/ui/calendar"
+import {
+  createBookingSchema,
+  type CreateBookingInput,
+} from "@/validators/booking";
+import { useCreateBooking } from "@/hooks/use-bookings";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { PhoneInput } from "@/components/shared/phone-input"
-import { EVENT_TYPE_LABELS, type EventType } from "@/types/booking"
-import { formatDate } from "@/lib/utils"
-import { CalendarIcon } from "lucide-react"
-import { ru } from "date-fns/locale"
+} from "@/components/ui/select";
+import { PhoneInput } from "@/components/shared/phone-input";
+import { EVENT_TYPE_LABELS, type EventType } from "@/types/booking";
+import { formatDate } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
+import { ru } from "date-fns/locale";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 const EVENT_TYPES: { value: EventType; label: string }[] = [
   { value: "WEDDING", label: EVENT_TYPE_LABELS.WEDDING },
@@ -38,51 +42,91 @@ const EVENT_TYPES: { value: EventType; label: string }[] = [
   { value: "CORPORATE", label: EVENT_TYPE_LABELS.CORPORATE },
   { value: "FUNERAL", label: EVENT_TYPE_LABELS.FUNERAL },
   { value: "OTHER", label: EVENT_TYPE_LABELS.OTHER },
-]
+];
 
 interface BookingFormProps {
-  venueId: string
-  venueName: string
-  onSuccess?: () => void
-  className?: string
+  venueId: string;
+  venueName: string;
+  capacityMin: number;
+  capacityMax: number;
+  onSuccess?: () => void;
+  className?: string;
 }
 
 export const BookingForm = ({
   venueId,
   venueName,
+  capacityMin,
+  capacityMax,
   onSuccess,
   className,
 }: BookingFormProps) => {
-  const { mutate, isPending } = useCreateBooking()
+  const { mutate, isPending } = useCreateBooking();
 
   const form = useForm<CreateBookingInput>({
     resolver: zodResolver(createBookingSchema),
     defaultValues: {
       venueId,
       eventType: "WEDDING",
-      guestCount: 300,
+      guestCount: capacityMin,
       contactName: "",
       contactPhone: "",
       message: "",
     },
-  })
+  });
+
+  useEffect(() => {
+    const savedName = localStorage.getItem("booking_contactName");
+    const savedPhone = localStorage.getItem("booking_contactPhone");
+    const savedEventDate = localStorage.getItem("booking_eventDate");
+
+    if (!savedName && !savedPhone) {
+      return;
+    }
+
+    const currentValues = form.getValues();
+
+    form.reset({
+      ...currentValues,
+      contactName: savedName ?? currentValues.contactName,
+      contactPhone: savedPhone ?? currentValues.contactPhone,
+      eventDate: savedEventDate ?? currentValues.eventDate,
+    });
+  }, [form]);
+
+  const contactName = form.watch("contactName");
+  const contactPhone = form.watch("contactPhone");
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (contactName) {
+      localStorage.setItem("booking_contactName", contactName);
+    }
+
+    if (contactPhone) {
+      localStorage.setItem("booking_contactPhone", contactPhone);
+    }
+  }, [contactName, contactPhone]);
 
   const handleSubmit = (values: CreateBookingInput) => {
     mutate(values, {
       onSuccess: () => {
         toast.success("Заявка отправлена!", {
           description: `Владелец зала «${venueName}» получит уведомление и свяжется с вами.`,
-        })
-        form.reset()
-        onSuccess?.()
+        });
+        form.reset();
+        onSuccess?.();
       },
       onError: (error) => {
         toast.error("Ошибка", {
           description: error.message,
-        })
+        });
       },
-    })
-  }
+    });
+  };
 
   return (
     <form
@@ -106,18 +150,30 @@ export const BookingForm = ({
                 }
               >
                 <CalendarIcon className="mr-2 size-4" />
-                {field.value
-                  ? formatDate(field.value)
-                  : "Выберите дату"}
+                {field.value ? formatDate(field.value) : "Выберите дату"}
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value ? new Date(field.value + "T12:00:00") : undefined}
-                  onSelect={(date) =>
-                    field.onChange(date ? date.toISOString().split("T")[0] : "")
+                  selected={
+                    field.value
+                      ? new Date(field.value + "T12:00:00")
+                      : undefined
                   }
-                  disabled={(date) => date < new Date(new Date().toDateString())}
+                  onSelect={(date) => {
+                    if (!date) {
+                      field.onChange("");
+                      return;
+                    }
+
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, "0");
+                    const day = String(date.getDate()).padStart(2, "0");
+                    field.onChange(`${year}-${month}-${day}`);
+                  }}
+                  disabled={(date) =>
+                    date < new Date(new Date().toDateString())
+                  }
                   locale={ru}
                 />
               </PopoverContent>
@@ -139,7 +195,9 @@ export const BookingForm = ({
           render={({ field }) => (
             <Select
               value={field.value}
-              onValueChange={(v: string | null) => field.onChange(v ?? "WEDDING")}
+              onValueChange={(v: string | null) =>
+                field.onChange(v ?? "WEDDING")
+              }
             >
               <SelectTrigger id="eventType" className="w-full">
                 <SelectValue placeholder="Выберите тип" />
@@ -163,15 +221,16 @@ export const BookingForm = ({
 
       <div className="space-y-2">
         <Label htmlFor="guestCount">Количество гостей</Label>
+        <p className="text-xs text-muted-foreground">
+          Зал вмещает от {capacityMin} до {capacityMax} гостей
+        </p>
         <Input
           id="guestCount"
           type="number"
-          min={10}
-          max={2000}
-          placeholder="300"
+          placeholder={String(capacityMin)}
           {...form.register("guestCount", { valueAsNumber: true })}
           className={cn(
-            form.formState.errors.guestCount && "border-destructive"
+            form.formState.errors.guestCount && "border-destructive",
           )}
         />
         {form.formState.errors.guestCount && (
@@ -188,7 +247,7 @@ export const BookingForm = ({
           placeholder="Магомед"
           {...form.register("contactName")}
           className={cn(
-            form.formState.errors.contactName && "border-destructive"
+            form.formState.errors.contactName && "border-destructive",
           )}
         />
         {form.formState.errors.contactName && (
@@ -238,5 +297,5 @@ export const BookingForm = ({
         {isPending ? "Отправляем..." : "Отправить заявку"}
       </Button>
     </form>
-  )
-}
+  );
+};

@@ -19,8 +19,19 @@ export async function POST(req: NextRequest) {
 
     const venue = await prisma.venue.findUnique({
       where: { id: venueId, isActive: true },
+      select: {
+        id: true,
+        capacityMin: true,
+        capacityMax: true,
+      },
     })
     if (!venue) return notFound("Зал")
+
+    if (guestCount < venue.capacityMin || guestCount > venue.capacityMax) {
+      return error(
+        `Этот зал вмещает от ${venue.capacityMin} до ${venue.capacityMax} гостей`,
+      )
+    }
 
     const date = new Date(eventDate)
     const blocked = await prisma.blockedDate.findUnique({

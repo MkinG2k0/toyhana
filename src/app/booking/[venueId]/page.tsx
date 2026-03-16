@@ -90,14 +90,19 @@ export default async function BookingPage({ params }: PageProps) {
             </p>
 
             <div className="mt-6">
-              <BookingForm venueId={venue.id} venueName={venue.name} />
+              <BookingForm
+                venueId={venue.id}
+                venueName={venue.name}
+                capacityMin={venue.capacityMin}
+                capacityMax={venue.capacityMax}
+              />
             </div>
           </div>
 
           <aside className="lg:w-80 lg:shrink-0">
             <div className="sticky top-20 rounded-2xl border border-surface-200 overflow-hidden bg-surface-50">
               {mainPhoto && (
-                <div className="relative aspect-[4/3] bg-surface-200">
+                <div className="relative aspect-4/3 bg-surface-200">
                   <Image
                     src={mainPhoto}
                     alt={venue.name}

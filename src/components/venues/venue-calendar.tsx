@@ -1,36 +1,77 @@
-"use client"
+"use client";
 
-import { Calendar } from "@/components/ui/calendar"
-import { cn } from "@/lib/utils"
-import { ru } from "date-fns/locale"
+import { useEffect, useState } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { ru } from "date-fns/locale";
+import { format, parseISO, startOfDay, isBefore } from "date-fns";
 
 interface VenueCalendarProps {
-  blockedDates: string[]
-  selectedDate?: Date
-  onSelectDate?: (date: Date | undefined) => void
-  className?: string
+  blockedDates: string[];
+  className?: string;
 }
+
+const BOOKING_EVENT_DATE_KEY = "booking_eventDate";
 
 export const VenueCalendar = ({
   blockedDates,
-  selectedDate,
-  onSelectDate,
   className,
 }: VenueCalendarProps) => {
-  const blockedSet = new Set(
-    blockedDates.map((d) => new Date(d).toDateString())
-  )
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-  const isBlocked = (date: Date) => blockedSet.has(date.toDateString())
-  const isPast = (date: Date) => date < new Date(new Date().toDateString())
+  const blockedSet = new Set(
+    blockedDates.map((d) => new Date(d).toDateString()),
+  );
+
+  const isBlocked = (date: Date) => blockedSet.has(date.toDateString());
+  const isPast = (date: Date) =>
+    isBefore(startOfDay(date), startOfDay(new Date()));
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const saved = window.localStorage.getItem(BOOKING_EVENT_DATE_KEY);
+    if (!saved) {
+      return;
+    }
+
+    try {
+      const parsed = parseISO(saved);
+      if (!Number.isNaN(parsed.getTime()) && !isPast(parsed) && !isBlocked(parsed)) {
+        setSelectedDate(parsed);
+      }
+    } catch {
+      // ignore invalid stored date
+    }
+  }, []);
+
+  const handleSelect = (date: Date | undefined) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    setSelectedDate(date);
+
+    if (!date) {
+      window.localStorage.removeItem(BOOKING_EVENT_DATE_KEY);
+      return;
+    }
+
+    const value = format(date, "yyyy-MM-dd");
+    window.localStorage.setItem(BOOKING_EVENT_DATE_KEY, value);
+  };
 
   return (
-    <div className={cn("rounded-xl border border-surface-200 p-4", className)}>
+    <div
+      className={cn(" rounded-2xl border border-surface-200 p-4", className)}
+    >
       <h3 className="mb-3 font-semibold">Свободные даты</h3>
       <Calendar
         mode="single"
         selected={selectedDate}
-        onSelect={onSelectDate}
+        onSelect={handleSelect}
         locale={ru}
         disabled={(date) => isPast(date) || isBlocked(date)}
         modifiers={{
@@ -39,7 +80,7 @@ export const VenueCalendar = ({
         modifiersClassNames={{
           blocked: "line-through text-muted-foreground opacity-50",
         }}
-        className="w-full"
+        className="mx-auto w-full max-w-96 "
       />
       <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
         <div className="flex items-center gap-1">
@@ -52,5 +93,5 @@ export const VenueCalendar = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

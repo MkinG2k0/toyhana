@@ -15,11 +15,11 @@ export type EventType =
   | "OTHER"
 
 export const EVENT_TYPE_LABELS: Record<EventType, string> = {
-  WEDDING: "Свадьба",
-  ENGAGEMENT: "Помолвка",
+  WEDDING: "Свадьба (Той)",
+  ENGAGEMENT: "Помолвка (Сговор)",
   BIRTHDAY: "День рождения",
   CORPORATE: "Корпоратив",
-  FUNERAL: "Поминки",
+  FUNERAL: "Тазият (поминки)",
   OTHER: "Другое",
 }
 

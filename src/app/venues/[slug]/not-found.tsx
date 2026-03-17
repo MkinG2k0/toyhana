@@ -10,8 +10,8 @@ export default function VenueNotFound() {
       <p className="text-muted-foreground mb-6">
         Возможно, он был удалён или ссылка неверна.
       </p>
-      <Button>
-        <Link href="/venues">Перейти в каталог</Link>
+      <Button render={<Link href="/venues" />}>
+        Перейти в каталог
       </Button>
     </div>
   );

@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { useState, useCallback } from "react"
-import { VenueCard } from "@/entities/venue"
-import { VenueFilters } from "@/features/venue-search"
-import { EmptyState } from "@/shared/ui/EmptyState"
-import { Skeleton } from "@/shared/ui/skeleton"
+import { useState, useCallback } from "react";
+import { VenueCard } from "@/entities/venue";
+import { VenueFilters } from "@/features/venue-search";
+import { EmptyState } from "@/shared/ui/EmptyState";
+import { Skeleton } from "@/shared/ui/skeleton";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/ui/select"
+} from "@/shared/ui/select";
 import {
   Pagination,
   PaginationContent,
@@ -19,14 +19,14 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/shared/ui/pagination"
-import { useVenues } from "@/entities/venue"
-import { pluralize } from "@/shared/lib/utils"
+} from "@/shared/ui/pagination";
+import { useVenues } from "@/entities/venue";
+import { pluralize } from "@/shared/lib/utils";
 import type {
   VenueFilters as VenueFiltersType,
   VenueSortOption,
   VenueListResponse,
-} from "@/entities/venue"
+} from "@/entities/venue";
 
 const SORT_OPTIONS: { value: VenueSortOption; label: string }[] = [
   { value: "popular", label: "Популярные" },
@@ -34,19 +34,19 @@ const SORT_OPTIONS: { value: VenueSortOption; label: string }[] = [
   { value: "price_asc", label: "Сначала дешевле" },
   { value: "price_desc", label: "Сначала дороже" },
   { value: "newest", label: "Новые" },
-]
+];
 
 const DEFAULT_FILTERS: VenueFiltersType = {
   page: 1,
   sort: "popular",
-}
+};
 
 interface VenueCatalogProps {
-  initialData?: VenueListResponse
+  initialData?: VenueListResponse;
 }
 
 export const VenueCatalog = ({ initialData }: VenueCatalogProps) => {
-  const [filters, setFilters] = useState<VenueFiltersType>(DEFAULT_FILTERS)
+  const [filters, setFilters] = useState<VenueFiltersType>(DEFAULT_FILTERS);
 
   const { data, isLoading } = useVenues(filters, {
     initialData:
@@ -54,24 +54,21 @@ export const VenueCatalog = ({ initialData }: VenueCatalogProps) => {
       filters.sort === DEFAULT_FILTERS.sort
         ? initialData
         : undefined,
-  })
+  });
 
   const handleFiltersChange = useCallback((newFilters: VenueFiltersType) => {
-    setFilters(newFilters)
-  }, [])
+    setFilters(newFilters);
+  }, []);
 
-  const handleSortChange = useCallback(
-    (sort: string | null) => {
-      if (!sort) return
-      setFilters((prev) => ({ ...prev, sort: sort as VenueSortOption, page: 1 }))
-    },
-    [],
-  )
+  const handleSortChange = useCallback((sort: string | null) => {
+    if (!sort) return;
+    setFilters((prev) => ({ ...prev, sort: sort as VenueSortOption, page: 1 }));
+  }, []);
 
   const handlePageChange = useCallback((page: number) => {
-    setFilters((prev) => ({ ...prev, page }))
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }, [])
+    setFilters((prev) => ({ ...prev, page }));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6">
@@ -173,8 +170,8 @@ export const VenueCatalog = ({ initialData }: VenueCatalogProps) => {
         </div>
       </div>
     </main>
-  )
-}
+  );
+};
 
 const VenueCardSkeleton = () => (
   <div className="overflow-hidden rounded-xl border border-surface-200">
@@ -189,4 +186,4 @@ const VenueCardSkeleton = () => (
       <Skeleton className="h-6 w-24" />
     </div>
   </div>
-)
+);

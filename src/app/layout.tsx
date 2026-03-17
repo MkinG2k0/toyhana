@@ -1,28 +1,29 @@
-import { Golos_Text, Playfair_Display, Roboto } from "next/font/google"
-import { Toaster } from "@/components/ui/sonner"
-import { Providers } from "@/providers"
-import "./globals.css"
+import { Golos_Text, Playfair_Display, Roboto } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
+import { Providers } from "@/providers";
+import "./globals.css";
 
-import type { Metadata } from "next"
+import type { Metadata } from "next";
+import { Header } from "@/components/layout/header";
 
 const roboto = Roboto({
   variable: "--font-roboto",
   weight: ["400", "500", "700"],
   subsets: ["latin", "cyrillic"],
   display: "swap",
-})
+});
 
 const golosText = Golos_Text({
   variable: "--font-golos",
   subsets: ["latin", "cyrillic"],
   display: "swap",
-})
+});
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin", "cyrillic"],
   display: "swap",
-})
+});
 
 export const metadata: Metadata = {
   title: {
@@ -40,23 +41,24 @@ export const metadata: Metadata = {
     "бронирование зала",
     "свадьба",
   ],
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
-  const fontVariables = `${roboto.variable} ${golosText.variable} ${playfairDisplay.variable}`
+  const fontVariables = `${roboto.variable} ${golosText.variable} ${playfairDisplay.variable}`;
 
   return (
     <html lang="ru" className={fontVariables} suppressHydrationWarning>
       <body className="font-sans antialiased">
         <Providers>
+          <Header />
           {children}
           <Toaster richColors position="top-center" />
         </Providers>
       </body>
     </html>
-  )
+  );
 }

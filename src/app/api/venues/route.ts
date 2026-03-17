@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
       return error(parsed.error.issues[0].message)
     }
 
-    const data = parsed.data
+    const { photos, ...data } = parsed.data
     const slug = slugify(data.name)
 
     const existing = await prisma.venue.findUnique({ where: { slug } })
@@ -132,6 +132,20 @@ export async function POST(req: NextRequest) {
         ...data,
         slug: finalSlug,
         ownerId: result.user.id,
+        photos:
+          photos && photos.length > 0
+            ? {
+                create: photos.map((photo, index) => ({
+                  url: photo.url,
+                  key: photo.key,
+                  order: index,
+                  isMain: index === 0,
+                })),
+              }
+            : undefined,
+      },
+      include: {
+        photos: true,
       },
     })
 

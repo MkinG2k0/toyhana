@@ -43,6 +43,16 @@ export default async function VenueEditPage({ params }: EditPageProps) {
       hasWelcomeZone: true,
       hasOutdoorArea: true,
       cuisineTypes: true,
+      photos: {
+        select: {
+          id: true,
+          url: true,
+          key: true,
+          order: true,
+          isMain: true,
+        },
+        orderBy: { order: "asc" },
+      },
       ownerId: true,
     },
   })

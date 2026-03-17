@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -61,13 +62,15 @@ export const BookingForm = ({
   onSuccess,
   className,
 }: BookingFormProps) => {
+  const router = useRouter();
   const { mutate, isPending } = useCreateBooking();
 
   const form = useForm<CreateBookingInput>({
-    resolver: zodResolver(createBookingSchema),
+    resolver: zodResolver(createBookingSchema(capacityMin, capacityMax)),
     defaultValues: {
       venueId,
       eventType: "WEDDING",
+      eventDate: "",
       guestCount: capacityMin,
       contactName: "",
       contactPhone: "",
@@ -98,10 +101,6 @@ export const BookingForm = ({
   const contactPhone = form.watch("contactPhone");
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
     if (contactName) {
       localStorage.setItem("booking_contactName", contactName);
     }
@@ -119,6 +118,7 @@ export const BookingForm = ({
         });
         form.reset();
         onSuccess?.();
+        router.push("/");
       },
       onError: (error) => {
         toast.error("Ошибка", {
@@ -187,7 +187,7 @@ export const BookingForm = ({
         )}
       </div>
 
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <Label htmlFor="eventType">Тип мероприятия</Label>
         <Controller
           control={form.control}
@@ -217,7 +217,7 @@ export const BookingForm = ({
             {form.formState.errors.eventType.message}
           </p>
         )}
-      </div>
+      </div> */}
 
       <div className="space-y-2">
         <Label htmlFor="guestCount">Количество гостей</Label>

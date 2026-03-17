@@ -1,10 +1,14 @@
-import { z } from "zod/v4"
+import { z } from "zod/v4";
 
-export const createBookingSchema = z.object({
+const BASE_MIN_GUESTS = 10;
+const BASE_MAX_GUESTS = 2000;
+
+const baseBookingSchema = z.object({
   venueId: z.string().min(1, "Не указан зал"),
   eventDate: z.string().refine((d) => new Date(d) > new Date(), {
     message: "Дата мероприятия должна быть в будущем",
   }),
+
   eventType: z.enum([
     "WEDDING",
     "ENGAGEMENT",
@@ -16,25 +20,34 @@ export const createBookingSchema = z.object({
   guestCount: z
     .number()
     .int()
-    .min(10, "Минимум 10 гостей")
-    .max(2000, "Максимум 2000 гостей"),
+    .min(BASE_MIN_GUESTS, `Минимум ${BASE_MIN_GUESTS} гостей`)
+    .max(BASE_MAX_GUESTS, `Максимум ${BASE_MAX_GUESTS} гостей`),
   contactName: z.string().min(2, "Введите имя").max(100),
-  contactPhone: z
-    .string()
-    .regex(/^\+7\d{10}$/, "Формат: +7XXXXXXXXXX"),
+  contactPhone: z.string().regex(/^\+7\d{10}$/, "Формат: +7XXXXXXXXXX"),
   message: z.string().max(1000).optional(),
-})
+});
 
-export type CreateBookingInput = z.infer<typeof createBookingSchema>
+export const createBookingSchema = (
+  minGuests: number = BASE_MIN_GUESTS,
+  maxGuests: number = BASE_MAX_GUESTS,
+) => {
+  return baseBookingSchema.extend({
+    guestCount: baseBookingSchema.shape.guestCount
+      .min(minGuests, `Минимум ${minGuests} гостей`)
+      .max(maxGuests, `Максимум ${maxGuests} гостей`),
+  });
+};
+
+export type CreateBookingInput = z.infer<typeof baseBookingSchema>;
 
 export const updateBookingStatusSchema = z.object({
   status: z.enum(["CONFIRMED", "REJECTED", "CANCELLED"]),
   message: z.string().max(500).optional(),
-})
+});
 
 export type UpdateBookingStatusInput = z.infer<
   typeof updateBookingStatusSchema
->
+>;
 
 export const bookingListSchema = z.object({
   status: z
@@ -50,6 +63,6 @@ export const bookingListSchema = z.object({
   venueId: z.string().optional(),
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().min(1).max(50).default(10),
-})
+});
 
-export type BookingListParams = z.infer<typeof bookingListSchema>
+export type BookingListParams = z.infer<typeof bookingListSchema>;

@@ -11,6 +11,32 @@ const updateProfileSchema = z.object({
   role: z.enum(["CLIENT", "OWNER"]).optional(),
 })
 
+export async function GET() {
+  try {
+    const result = await requireAuth(["OWNER", "ADMIN", "CLIENT"])
+    if (result.error) return result.error
+
+    const user = await prisma.user.findUnique({
+      where: { id: result.user.id },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        telegramChatId: true,
+        whatsappPhone: true,
+      },
+    })
+
+    if (!user) {
+      return error("Пользователь не найден", 404)
+    }
+
+    return success(user)
+  } catch (err) {
+    return serverError(err)
+  }
+}
+
 export async function PATCH(req: NextRequest) {
   try {
     const result = await requireAuth(["OWNER", "ADMIN", "CLIENT"])

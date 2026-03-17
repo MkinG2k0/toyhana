@@ -4,13 +4,32 @@ import { useCallback, useRef, useState } from "react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { Upload, X, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 export interface UploadedImage {
   url: string
   key: string
+  kind?: "image" | "video"
 }
 
-const ACCEPTED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
+const ACCEPTED_MIME_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+]
+
+const IMAGE_MIME_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+]
+
+const MAX_SIZE_BYTES = 100 * 1024 * 1024
 
 interface ImageUploadProps {
   value: UploadedImage[]
@@ -44,15 +63,27 @@ export const ImageUpload = ({
       throw new Error(error ?? "Ошибка загрузки")
     }
     const { data } = await res.json()
-    return { url: data.url, key: data.key }
+    const isVideo = !IMAGE_MIME_TYPES.includes(file.type)
+    return {
+      url: data.url,
+      key: data.key,
+      kind: isVideo ? "video" : "image",
+    }
   }, [])
 
   const processFiles = useCallback(
     async (files: FileList | null) => {
       if (!files || disabled || value.length >= maxFiles) return
-      const accepted = Array.from(files).filter((f) =>
-        ACCEPTED_TYPES.includes(f.type)
-      )
+      const accepted = Array.from(files).filter((file) => {
+        if (!ACCEPTED_MIME_TYPES.includes(file.type)) {
+          return false
+        }
+        if (file.size > MAX_SIZE_BYTES) {
+          toast.error("Видео не должно превышать 100 МБ")
+          return false
+        }
+        return true
+      })
       const toAdd = Math.min(accepted.length, maxFiles - value.length)
       if (toAdd === 0) return
       setUploading(true)
@@ -137,7 +168,7 @@ export const ImageUpload = ({
         <input
           ref={inputRef}
           type="file"
-          accept={ACCEPTED_TYPES.join(",")}
+          accept={ACCEPTED_MIME_TYPES.join(",")}
           multiple
           className="sr-only"
           onChange={handleInputChange}
@@ -153,7 +184,7 @@ export const ImageUpload = ({
           <>
             <Upload className="size-8 text-muted-foreground" />
             <span className="mt-2 text-sm text-muted-foreground">
-              Перетащите фото или нажмите для выбора
+              Перетащите фото или видео либо нажмите для выбора
             </span>
             <span className="text-xs text-muted-foreground">
               {value.length} / {maxFiles}
@@ -164,30 +195,42 @@ export const ImageUpload = ({
 
       {value.length > 0 && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-          {value.map((img, index) => (
-            <div
-              key={img.key}
-              className="group relative aspect-square overflow-hidden rounded-lg border border-surface-200"
-            >
-              <Image
-                src={img.url}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="200px"
-              />
-              {!disabled && (
-                <button
-                  type="button"
-                  onClick={() => handleRemove(index)}
-                  className="absolute right-2 top-2 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
-                  aria-label="Удалить"
-                >
-                  <X className="size-4" />
-                </button>
-              )}
-            </div>
-          ))}
+          {value.map((item, index) => {
+            const isVideo = item.kind === "video"
+            return (
+              <div
+                key={item.key}
+                className="group relative aspect-square overflow-hidden rounded-lg border border-surface-200"
+              >
+                {isVideo ? (
+                  <video
+                    src={item.url}
+                    className="h-full w-full object-cover"
+                    controls
+                    muted
+                  />
+                ) : (
+                  <Image
+                    src={item.url}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="200px"
+                  />
+                )}
+                {!disabled && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(index)}
+                    className="absolute right-2 top-2 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                    aria-label="Удалить"
+                  >
+                    <X className="size-4" />
+                  </button>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>

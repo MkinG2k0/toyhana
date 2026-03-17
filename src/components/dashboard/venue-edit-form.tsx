@@ -1,19 +1,28 @@
-"use client"
+"use client";
 
-import { useForm, type Resolver } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { toast } from "sonner"
-import { createVenueSchema } from "@/validators/venue"
-import type { z } from "zod/v4"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft } from "lucide-react"
+import { useForm, type Resolver } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "sonner";
+import { createVenueSchema } from "@/validators/venue";
+import type { z } from "zod/v4";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ArrowLeft } from "lucide-react";
+import {
+  ImageUpload,
+  type UploadedImage,
+} from "@/components/shared/image-upload";
 
 const FEATURE_FIELDS = [
   { name: "hasHalalKitchen" as const, label: "Халяль кухня" },
@@ -27,39 +36,46 @@ const FEATURE_FIELDS = [
   { name: "hasSoundSystem" as const, label: "Звуковая система" },
   { name: "hasWelcomeZone" as const, label: "Зона приёма" },
   { name: "hasOutdoorArea" as const, label: "Открытая площадка" },
-]
+];
 
 interface VenueEditFormProps {
   venue: {
-    id: string
-    name: string
-    description: string
-    address: string
-    city: string
-    district: string | null
-    capacityMin: number
-    capacityMax: number
-    pricePerPerson: number
-    rentalPrice: number | null
-    hasHalalKitchen: boolean
-    allowOwnCook: boolean
-    hasPrayerRoom: boolean
-    hasSeparateHalls: boolean
-    allowOwnFruits: boolean
-    hasStage: boolean
-    hasProjector: boolean
-    hasParking: boolean
-    hasSoundSystem: boolean
-    hasWelcomeZone: boolean
-    hasOutdoorArea: boolean
-    cuisineTypes: string[]
-  }
+    id: string;
+    name: string;
+    description: string;
+    address: string;
+    city: string;
+    district: string | null;
+    capacityMin: number;
+    capacityMax: number;
+    pricePerPerson: number;
+    rentalPrice: number | null;
+    hasHalalKitchen: boolean;
+    allowOwnCook: boolean;
+    hasPrayerRoom: boolean;
+    hasSeparateHalls: boolean;
+    allowOwnFruits: boolean;
+    hasStage: boolean;
+    hasProjector: boolean;
+    hasParking: boolean;
+    hasSoundSystem: boolean;
+    hasWelcomeZone: boolean;
+    hasOutdoorArea: boolean;
+    cuisineTypes: string[];
+    photos: {
+      id: string;
+      url: string;
+      key: string;
+      order: number;
+      isMain: boolean;
+    }[];
+  };
 }
 
 export const VenueEditForm = ({ venue }: VenueEditFormProps) => {
-  const router = useRouter()
+  const router = useRouter();
 
-  type VenueFormValues = z.output<typeof createVenueSchema>
+  type VenueFormValues = z.output<typeof createVenueSchema>;
   const form = useForm<VenueFormValues>({
     resolver: zodResolver(createVenueSchema) as Resolver<VenueFormValues>,
     defaultValues: {
@@ -84,8 +100,12 @@ export const VenueEditForm = ({ venue }: VenueEditFormProps) => {
       hasWelcomeZone: venue.hasWelcomeZone,
       hasOutdoorArea: venue.hasOutdoorArea,
       cuisineTypes: venue.cuisineTypes,
+      photos: venue.photos.map((photo) => ({
+        url: photo.url,
+        key: photo.key,
+      })),
     },
-  })
+  });
 
   const handleSubmit = form.handleSubmit(async (data) => {
     try {
@@ -93,18 +113,21 @@ export const VenueEditForm = ({ venue }: VenueEditFormProps) => {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      })
-      const json = await res.json()
+      });
+      const json = await res.json();
       if (!res.ok) {
-        toast.error(json.error ?? "Ошибка сохранения")
-        return
+        toast.error(json.error ?? "Ошибка сохранения");
+        return;
       }
-      toast.success("Зал обновлён")
-      router.push("/dashboard/venues")
+      toast.success("Зал обновлён");
+      router.push("/dashboard/venues");
     } catch {
-      toast.error("Ошибка сохранения")
+      toast.error("Ошибка сохранения");
     }
-  })
+  });
+
+  const photosValue =
+    (form.watch("photos") as UploadedImage[] | undefined) ?? [];
 
   return (
     <div className="max-w-2xl">
@@ -175,7 +198,11 @@ export const VenueEditForm = ({ venue }: VenueEditFormProps) => {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="city">Город</Label>
-                <Input id="city" {...form.register("city")} className="mt-1.5" />
+                <Input
+                  id="city"
+                  {...form.register("city")}
+                  className="mt-1.5"
+                />
               </div>
               <div>
                 <Label htmlFor="district">Район</Label>
@@ -267,6 +294,24 @@ export const VenueEditForm = ({ venue }: VenueEditFormProps) => {
           </CardContent>
         </Card>
 
+        <Card className="border-surface-200">
+          <CardHeader>
+            <CardTitle>Фотографии</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ImageUpload
+              value={photosValue}
+              onChange={(images) =>
+                form.setValue("photos", images, { shouldDirty: true })
+              }
+              maxFiles={10}
+            />
+            <p className="mt-2 text-xs text-muted-foreground">
+              Обновите фото зала. Первое фото используется как обложка.
+            </p>
+          </CardContent>
+        </Card>
+
         <div className="flex gap-3">
           <Button
             type="submit"
@@ -285,5 +330,5 @@ export const VenueEditForm = ({ venue }: VenueEditFormProps) => {
         </div>
       </form>
     </div>
-  )
-}
+  );
+};

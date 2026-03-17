@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -8,6 +9,15 @@ import { Badge } from "@/components/ui/badge"
 import { EmptyState } from "@/components/shared/empty-state"
 import { Building2, Pencil, Trash2 } from "lucide-react"
 import { formatPrice } from "@/lib/utils"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { toast } from "sonner"
 
 interface VenueItem {
   id: string
@@ -26,18 +36,73 @@ interface VenuesListProps {
 }
 
 export const VenuesList = ({ venues }: VenuesListProps) => {
-  const handleDelete = async (id: string) => {
-    if (!confirm("Удалить зал? Он будет скрыт из каталога.")) return
+  const [confirmType, setConfirmType] = useState<"visibility" | "delete" | null>(
+    null
+  )
+  const [targetVenue, setTargetVenue] = useState<VenueItem | null>(null)
+  const [nextIsActive, setNextIsActive] = useState<boolean | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const openVisibilityDialog = (venue: VenueItem) => {
+    setTargetVenue(venue)
+    setNextIsActive(!venue.isActive)
+    setConfirmType("visibility")
+  }
+
+  const openDeleteDialog = (venue: VenueItem) => {
+    setTargetVenue(venue)
+    setConfirmType("delete")
+  }
+
+  const closeDialog = () => {
+    if (isSubmitting) return
+    setConfirmType(null)
+    setTargetVenue(null)
+    setNextIsActive(null)
+  }
+
+  const handleConfirm = async () => {
+    if (!targetVenue || !confirmType) return
+    setIsSubmitting(true)
     try {
-      const res = await fetch(`/api/venues/${id}`, { method: "DELETE" })
-      if (res.ok) {
+      if (confirmType === "visibility") {
+        if (nextIsActive === null) return
+        const res = await fetch(`/api/venues/${targetVenue.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isActive: nextIsActive }),
+        })
+        const json = await res.json()
+        if (!res.ok) {
+          toast.error(json.error ?? "Ошибка изменения статуса")
+          return
+        }
+        toast.success(
+          nextIsActive ? "Зал снова отображается в каталоге" : "Зал скрыт"
+        )
         window.location.reload()
-      } else {
-        const { error } = await res.json()
-        alert(error ?? "Ошибка удаления")
+      } else if (confirmType === "delete") {
+        const res = await fetch(`/api/venues/${targetVenue.id}`, {
+          method: "DELETE",
+        })
+        const json = await res.json()
+        if (!res.ok) {
+          toast.error(json.error ?? "Ошибка удаления")
+          return
+        }
+        const result = json.data as { deleted: boolean; archived: boolean }
+
+        if (result?.archived) {
+          toast.success("Зал скрыт и больше не отображается в каталоге.")
+        } else {
+          toast.success("Зал удалён.")
+        }
+        window.location.reload()
       }
     } catch {
-      alert("Ошибка удаления")
+      toast.error("Что-то пошло не так. Попробуйте ещё раз.")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -136,8 +201,16 @@ export const VenuesList = ({ venues }: VenuesListProps) => {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="text-muted-foreground hover:bg-surface-200"
+                        onClick={() => openVisibilityDialog(venue)}
+                      >
+                        {venue.isActive ? "Скрыть" : "Показать"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => handleDelete(venue.id)}
+                        onClick={() => openDeleteDialog(venue)}
                       >
                         <Trash2 className="size-4" />
                         Удалить
@@ -150,6 +223,55 @@ export const VenuesList = ({ venues }: VenuesListProps) => {
           })}
         </div>
       )}
+
+      <Dialog open={!!confirmType} onOpenChange={closeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {confirmType === "delete"
+                ? "Скрыть зал?"
+                : nextIsActive
+                  ? "Показать зал в каталоге?"
+                  : "Скрыть зал?"}
+            </DialogTitle>
+            <DialogDescription>
+              {confirmType === "delete"
+                ? "Зал будет скрыт из каталога и не будет доступен для новых заявок. Существующие данные сохранятся."
+                : nextIsActive
+                  ? "Зал снова станет виден в каталоге и доступен для заявок."
+                  : "Зал перестанет отображаться в каталоге, но данные сохранятся, и вы сможете включить его позже."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-row justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={closeDialog}
+              disabled={isSubmitting}
+            >
+              Отмена
+            </Button>
+            <Button
+              type="button"
+              className={
+                confirmType === "delete"
+                  ? "bg-destructive text-white hover:bg-destructive/90"
+                  : "bg-brand-500 text-white hover:bg-brand-600"
+              }
+              onClick={handleConfirm}
+              disabled={isSubmitting}
+            >
+              {isSubmitting
+                ? "Подтверждение..."
+                : confirmType === "delete"
+                  ? "Скрыть"
+                  : nextIsActive
+                    ? "Показать"
+                    : "Скрыть"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

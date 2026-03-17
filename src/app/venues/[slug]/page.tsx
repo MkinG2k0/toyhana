@@ -1,31 +1,24 @@
-import { notFound } from "next/navigation"
-import Link from "next/link"
-import { prisma } from "@/lib/prisma"
-import { Header } from "@/components/layout/header"
-import { Footer } from "@/components/layout/footer"
-import { VenueGallery } from "@/components/venues/venue-gallery"
-import { VenueFeatureBadges } from "@/components/venues/venue-features"
-import { VenueCalendar } from "@/components/venues/venue-calendar"
-import { VenueMap } from "@/components/venues/venue-map"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
-import {
-  Star,
-  Users,
-  MapPin,
-  Phone,
-  Shield,
-  Crown,
-} from "lucide-react"
-import { formatPrice, formatPhone } from "@/lib/utils"
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { VenueGallery } from "@/components/venues/venue-gallery";
+import { VenueFeatureBadges } from "@/components/venues/venue-features";
+import { VenueCalendar } from "@/components/venues/venue-calendar";
+import { VenueMap } from "@/components/venues/venue-map";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Star, Users, MapPin, Phone, Shield, Crown } from "lucide-react";
+import { formatPrice, formatPhone } from "@/lib/utils";
 
-import type { Metadata } from "next"
-import type { VenuePhoto } from "@/types/venue"
+import type { Metadata } from "next";
+import type { VenuePhoto } from "@/types/venue";
 
 interface PageProps {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }
 
 const getVenue = async (slug: string) => {
@@ -46,26 +39,26 @@ const getVenue = async (slug: string) => {
         take: 10,
       },
     },
-  })
+  });
 
   if (venue) {
     await prisma.venue.update({
       where: { id: venue.id },
       data: { viewCount: { increment: 1 } },
-    })
+    });
   }
 
-  return venue
-}
+  return venue;
+};
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { slug } = await params
-  const venue = await getVenue(slug)
+  const { slug } = await params;
+  const venue = await getVenue(slug);
 
   if (!venue) {
-    return { title: "Зал не найден" }
+    return { title: "Зал не найден" };
   }
 
   return {
@@ -76,18 +69,18 @@ export async function generateMetadata({
       description: venue.description.slice(0, 160),
       images: venue.photos[0]?.url ? [venue.photos[0].url] : [],
     },
-  }
+  };
 }
 
 export default async function VenueDetailPage({ params }: PageProps) {
-  const { slug } = await params
-  const venue = await getVenue(slug)
+  const { slug } = await params;
+  const venue = await getVenue(slug);
 
-  if (!venue) notFound()
+  if (!venue) notFound();
 
   const blockedDatesStr = venue.blockedDates.map((d) =>
-    new Date(d.date).toISOString()
-  )
+    new Date(d.date).toISOString(),
+  );
 
   const photos: VenuePhoto[] = venue.photos.map((p) => ({
     id: p.id,
@@ -95,11 +88,10 @@ export default async function VenueDetailPage({ params }: PageProps) {
     key: p.key,
     order: p.order,
     isMain: p.isMain,
-  }))
+  }));
 
   return (
     <>
-      <Header />
       <main className="mx-auto max-w-7xl px-4 py-6">
         <VenueGallery photos={photos} venueName={venue.name} />
 
@@ -270,7 +262,7 @@ export default async function VenueDetailPage({ params }: PageProps) {
                   <Phone className="size-4 shrink-0" />
                   {venue.owner.phone
                     ? formatPhone(venue.owner.phone)
-                    : venue.owner.email ?? "—"}
+                    : (venue.owner.email ?? "—")}
                 </p>
               </div>
             </div>
@@ -297,5 +289,5 @@ export default async function VenueDetailPage({ params }: PageProps) {
       </main>
       <Footer />
     </>
-  )
+  );
 }

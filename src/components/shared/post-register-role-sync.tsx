@@ -1,32 +1,34 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
+import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface PostRegisterRoleSyncProps {
-  fromRegister?: string | string[]
+  fromRegister?: string | string[];
 }
 
 /** После входа через Google с регистрации как OWNER обновляет роль в профиле и убирает query из URL */
-export function PostRegisterRoleSync({ fromRegister }: PostRegisterRoleSyncProps) {
-  const router = useRouter()
-  const { data: session, status, update } = useSession()
-  const doneRef = useRef(false)
+export function PostRegisterRoleSync({
+  fromRegister,
+}: PostRegisterRoleSyncProps) {
+  const router = useRouter();
+  const { data: session, status, update } = useSession();
+  const doneRef = useRef(false);
 
   useEffect(() => {
-    if (status !== "authenticated" || !session?.user || doneRef.current) return
+    if (status !== "authenticated" || !session?.user || doneRef.current) return;
 
-    const value = Array.isArray(fromRegister) ? fromRegister[0] : fromRegister
-    if (value !== "OWNER") return
+    const value = Array.isArray(fromRegister) ? fromRegister[0] : fromRegister;
+    if (value !== "OWNER") return;
 
     if (session.user.role === "OWNER") {
-      router.replace("/", { scroll: false })
-      doneRef.current = true
-      return
+      router.replace("/", { scroll: false });
+      doneRef.current = true;
+      return;
     }
 
-    doneRef.current = true
+    doneRef.current = true;
     fetch("/api/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -34,14 +36,14 @@ export function PostRegisterRoleSync({ fromRegister }: PostRegisterRoleSyncProps
     })
       .then(async (res) => {
         if (res.ok) {
-          await update()
-          router.replace("/dashboard", { scroll: false })
+          await update();
+          router.replace("/dashboard", { scroll: false });
         } else {
-          router.replace("/", { scroll: false })
+          router.replace("/", { scroll: false });
         }
       })
-      .catch(() => router.replace("/", { scroll: false }))
-  }, [status, session?.user?.role, fromRegister, router, update])
+      .catch(() => router.replace("/", { scroll: false }));
+  }, [status, session?.user?.role, fromRegister, router, update]);
 
-  return null
+  return null;
 }

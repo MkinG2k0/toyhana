@@ -99,7 +99,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <>
       <PostRegisterRoleSync fromRegister={params?.fromRegister} />
-      <Header />
       <main>
         {/* Hero */}
         <section className="relative bg-brand-900 px-4 py-20 text-white md:py-32">

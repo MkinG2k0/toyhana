@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     if (result.error) return result.error
 
     const body = await req.json()
-    const parsed = createBookingSchema.safeParse(body)
+    const parsed = createBookingSchema().safeParse(body)
     if (!parsed.success) {
       return error(parsed.error.issues[0].message)
     }

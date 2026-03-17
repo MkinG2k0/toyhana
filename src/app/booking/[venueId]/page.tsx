@@ -1,18 +1,18 @@
-import Image from "next/image"
-import { notFound } from "next/navigation"
-import Link from "next/link"
-import { prisma } from "@/lib/prisma"
-import { Header } from "@/components/layout/header"
-import { Footer } from "@/components/layout/footer"
-import { BookingForm } from "@/components/booking/booking-form"
-import { Button } from "@/components/ui/button"
-import { formatPrice } from "@/lib/utils"
-import { ArrowLeft, Users, MapPin } from "lucide-react"
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { BookingForm } from "@/components/booking/booking-form";
+import { Button } from "@/components/ui/button";
+import { formatPrice } from "@/lib/utils";
+import { ArrowLeft, Users, MapPin } from "lucide-react";
 
-import type { Metadata } from "next"
+import type { Metadata } from "next";
 
 interface PageProps {
-  params: Promise<{ venueId: string }>
+  params: Promise<{ venueId: string }>;
 }
 
 const getVenue = async (venueId: string) => {
@@ -36,36 +36,35 @@ const getVenue = async (venueId: string) => {
         take: 1,
       },
     },
-  })
-}
+  });
+};
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { venueId } = await params
-  const venue = await getVenue(venueId)
+  const { venueId } = await params;
+  const venue = await getVenue(venueId);
 
   if (!venue) {
-    return { title: "Зал не найден" }
+    return { title: "Зал не найден" };
   }
 
   return {
     title: `Бронирование — ${venue.name} | Тойхана`,
     description: `Оставить заявку на бронирование зала «${venue.name}» в Махачкале.`,
-  }
+  };
 }
 
 export default async function BookingPage({ params }: PageProps) {
-  const { venueId } = await params
-  const venue = await getVenue(venueId)
+  const { venueId } = await params;
+  const venue = await getVenue(venueId);
 
-  if (!venue) notFound()
+  if (!venue) notFound();
 
-  const mainPhoto = venue.photos[0]?.url
-
+  const mainPhoto = venue.photos[0]?.url;
+  console.log(venue);
   return (
     <>
-      <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Button
@@ -141,5 +140,5 @@ export default async function BookingPage({ params }: PageProps) {
       </main>
       <Footer />
     </>
-  )
+  );
 }

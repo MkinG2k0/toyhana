@@ -34,6 +34,13 @@ export const venueListSchema = z.object({
 
 export type VenueListParams = z.infer<typeof venueListSchema>
 
+const venuePhotoInputSchema = z.object({
+  url: z.string().url(),
+  key: z.string().min(1),
+})
+
+export type VenuePhotoInput = z.infer<typeof venuePhotoInputSchema>
+
 export const createVenueSchema = z.object({
   name: z.string().min(2, "Минимум 2 символа").max(200),
   description: z.string().min(10, "Минимум 10 символов").max(5000),
@@ -67,6 +74,7 @@ export const createVenueSchema = z.object({
   hasWelcomeZone: z.boolean().default(false),
   hasOutdoorArea: z.boolean().default(false),
   cuisineTypes: z.array(z.string()).default([]),
+  photos: z.array(venuePhotoInputSchema).max(20).optional(),
 })
 
 export type CreateVenueInput = z.infer<typeof createVenueSchema>

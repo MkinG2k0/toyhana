@@ -20,7 +20,7 @@ import {
 
 import type { VenueCardData as VenueCardType } from "@/entities/venue";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 const getTopVenues = async (): Promise<VenueCardType[]> => {
   try {

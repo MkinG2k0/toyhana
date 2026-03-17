@@ -10,8 +10,19 @@ import { ArrowLeft, Users, MapPin } from "lucide-react";
 
 import type { Metadata } from "next";
 
+export const revalidate = 3600;
+export const dynamicParams = true;
+
 interface PageProps {
   params: Promise<{ venueId: string }>;
+}
+
+export async function generateStaticParams() {
+  const venues = await prisma.venue.findMany({
+    where: { isActive: true },
+    select: { id: true },
+  });
+  return venues.map((v) => ({ venueId: v.id }));
 }
 
 const getVenue = async (venueId: string) => {
@@ -61,7 +72,6 @@ export default async function BookingPage({ params }: PageProps) {
   if (!venue) notFound();
 
   const mainPhoto = venue.photos[0]?.url;
-  console.log(venue);
   return (
     <>
       <main className="container mx-auto px-4 py-8">

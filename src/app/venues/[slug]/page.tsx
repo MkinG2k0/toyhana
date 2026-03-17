@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import { after } from "next/server"
 import Link from "next/link"
 import { prisma } from "@/shared/lib/prisma"
 import { Footer } from "@/widgets/layout"
@@ -13,12 +14,23 @@ import { formatPrice, formatPhone } from "@/shared/lib/utils"
 import type { Metadata } from "next"
 import type { VenuePhoto } from "@/entities/venue"
 
+export const revalidate = 3600
+export const dynamicParams = true
+
 interface PageProps {
   params: Promise<{ slug: string }>
 }
 
+export async function generateStaticParams() {
+  const venues = await prisma.venue.findMany({
+    where: { isActive: true },
+    select: { slug: true },
+  })
+  return venues.map((v) => ({ slug: v.slug }))
+}
+
 const getVenue = async (slug: string) => {
-  const venue = await prisma.venue.findFirst({
+  return prisma.venue.findFirst({
     where: {
       OR: [{ slug }, { id: slug }],
       isActive: true,
@@ -36,15 +48,6 @@ const getVenue = async (slug: string) => {
       },
     },
   })
-
-  if (venue) {
-    await prisma.venue.update({
-      where: { id: venue.id },
-      data: { viewCount: { increment: 1 } },
-    })
-  }
-
-  return venue
 }
 
 export async function generateMetadata({
@@ -71,6 +74,13 @@ export default async function VenueDetailPage({ params }: PageProps) {
   const venue = await getVenue(slug)
 
   if (!venue) notFound()
+
+  after(async () => {
+    await prisma.venue.update({
+      where: { id: venue.id },
+      data: { viewCount: { increment: 1 } },
+    })
+  })
 
   const blockedDatesStr = venue.blockedDates.map((d) =>
     new Date(d.date).toISOString(),

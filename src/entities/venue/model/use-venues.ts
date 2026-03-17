@@ -27,12 +27,17 @@ const fetchVenue = async (slug: string): Promise<VenueDetail> => {
   return json.data
 }
 
-export const useVenues = (filters: VenueFilters) => {
+interface UseVenuesOptions {
+  initialData?: VenueListResponse
+}
+
+export const useVenues = (filters: VenueFilters, options?: UseVenuesOptions) => {
   return useQuery({
     queryKey: venueKeys.list(filters),
     queryFn: () => fetchVenues(filters),
     staleTime: STALE_TIME_LIST,
     placeholderData: keepPreviousData,
+    initialData: options?.initialData,
   })
 }
 

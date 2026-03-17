@@ -1,7 +1,7 @@
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DashboardSettingsForm } from "@/components/dashboard";
+import { auth } from "@/shared/lib/auth";
+import { prisma } from "@/shared/lib/prisma";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { ProfileEditForm } from "@/features/profile-edit";
 
 export default async function DashboardSettingsPage() {
   const session = await auth();
@@ -43,7 +43,7 @@ export default async function DashboardSettingsPage() {
           <CardTitle>Профиль</CardTitle>
         </CardHeader>
         <CardContent>
-          <DashboardSettingsForm initialProfile={initialProfile} />
+          <ProfileEditForm initialProfile={initialProfile} />
         </CardContent>
       </Card>
     </div>

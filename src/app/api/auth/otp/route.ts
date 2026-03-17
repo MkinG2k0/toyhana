@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { sendOtp, generateOtpCode } from "@/lib/sms"
-import { loginSchema } from "@/validators/auth"
-import { success, error, serverError } from "@/lib/api-response"
+import { prisma } from "@/shared/lib/prisma"
+import { sendOtp, generateOtpCode } from "@/shared/lib/sms"
+import { loginSchema } from "@/features/auth-sms/model/schema"
+import { success, error, serverError } from "@/shared/api"
 
 const OTP_EXPIRY_MINUTES = 5
 const OTP_COOLDOWN_SECONDS = 60

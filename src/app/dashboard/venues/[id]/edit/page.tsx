@@ -1,7 +1,7 @@
-import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { prisma } from "@/shared/lib/prisma"
+import { auth } from "@/shared/lib/auth"
 import { redirect, notFound } from "next/navigation"
-import { VenueEditForm } from "@/components/dashboard/venue-edit-form"
+import { VenueEditForm } from "@/features/venue-edit"
 
 export const dynamic = "force-dynamic"
 

@@ -1,24 +1,20 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { prisma } from "@/lib/prisma";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { VenueGallery } from "@/components/venues/venue-gallery";
-import { VenueFeatureBadges } from "@/components/venues/venue-features";
-import { VenueCalendar } from "@/components/venues/venue-calendar";
-import { VenueMap } from "@/components/venues/venue-map";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { Star, Users, MapPin, Phone, Shield, Crown } from "lucide-react";
-import { formatPrice, formatPhone } from "@/lib/utils";
-
-import type { Metadata } from "next";
-import type { VenuePhoto } from "@/types/venue";
+import { notFound } from "next/navigation"
+import Link from "next/link"
+import { prisma } from "@/shared/lib/prisma"
+import { Footer } from "@/widgets/layout"
+import { VenueGallery, VenueCalendar, VenueMap } from "@/widgets/venue-detail"
+import { VenueFeatureBadges } from "@/entities/venue"
+import { Badge } from "@/shared/ui/badge"
+import { Button } from "@/shared/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs"
+import { Separator } from "@/shared/ui/separator"
+import { Star, Users, MapPin, Phone, Shield, Crown } from "lucide-react"
+import { formatPrice, formatPhone } from "@/shared/lib/utils"
+import type { Metadata } from "next"
+import type { VenuePhoto } from "@/entities/venue"
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string }>
 }
 
 const getVenue = async (slug: string) => {
@@ -39,27 +35,25 @@ const getVenue = async (slug: string) => {
         take: 10,
       },
     },
-  });
+  })
 
   if (venue) {
     await prisma.venue.update({
       where: { id: venue.id },
       data: { viewCount: { increment: 1 } },
-    });
+    })
   }
 
-  return venue;
-};
+  return venue
+}
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const venue = await getVenue(slug);
+  const { slug } = await params
+  const venue = await getVenue(slug)
 
-  if (!venue) {
-    return { title: "Зал не найден" };
-  }
+  if (!venue) return { title: "Зал не найден" }
 
   return {
     title: `${venue.name} — от ${formatPrice(venue.pricePerPerson)}/чел, до ${venue.capacityMax} гостей`,
@@ -69,18 +63,18 @@ export async function generateMetadata({
       description: venue.description.slice(0, 160),
       images: venue.photos[0]?.url ? [venue.photos[0].url] : [],
     },
-  };
+  }
 }
 
 export default async function VenueDetailPage({ params }: PageProps) {
-  const { slug } = await params;
-  const venue = await getVenue(slug);
+  const { slug } = await params
+  const venue = await getVenue(slug)
 
-  if (!venue) notFound();
+  if (!venue) notFound()
 
   const blockedDatesStr = venue.blockedDates.map((d) =>
     new Date(d.date).toISOString(),
-  );
+  )
 
   const photos: VenuePhoto[] = venue.photos.map((p) => ({
     id: p.id,
@@ -88,7 +82,7 @@ export default async function VenueDetailPage({ params }: PageProps) {
     key: p.key,
     order: p.order,
     isMain: p.isMain,
-  }));
+  }))
 
   return (
     <>
@@ -96,7 +90,6 @@ export default async function VenueDetailPage({ params }: PageProps) {
         <VenueGallery photos={photos} venueName={venue.name} />
 
         <div className="mt-6 flex flex-col gap-8 lg:flex-row">
-          {/* Main content */}
           <div className="flex-1">
             <div className="flex items-start gap-3">
               <div className="flex-1">
@@ -236,7 +229,6 @@ export default async function VenueDetailPage({ params }: PageProps) {
             </Tabs>
           </div>
 
-          {/* Sidebar */}
           <aside className="lg:w-80">
             <div className="sticky top-20 rounded-2xl border border-surface-200 p-6">
               <div className="text-center">
@@ -269,7 +261,6 @@ export default async function VenueDetailPage({ params }: PageProps) {
           </aside>
         </div>
 
-        {/* Mobile sticky CTA */}
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-surface-200 bg-white p-3 lg:hidden">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -289,5 +280,5 @@ export default async function VenueDetailPage({ params }: PageProps) {
       </main>
       <Footer />
     </>
-  );
+  )
 }

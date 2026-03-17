@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
-import { Card, CardContent } from "@/components/ui/card"
+import { prisma } from "@/shared/lib/prisma"
+import { auth } from "@/shared/lib/auth"
+import { Card, CardContent } from "@/shared/ui/card"
 import { Building2, CalendarDays, Clock, Star } from "lucide-react"
 import { redirect } from "next/navigation"
 

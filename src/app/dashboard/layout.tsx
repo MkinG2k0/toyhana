@@ -1,8 +1,6 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
-import { Header } from "@/components/layout/header";
-import { Sidebar } from "@/components/layout/sidebar";
-import { DashboardMobileNav } from "@/components/layout/dashboard-mobile-nav";
+import { auth } from "@/shared/lib/auth";
+import { Sidebar, DashboardMobileNav } from "@/widgets/layout";
 
 export default async function DashboardLayout({
   children,

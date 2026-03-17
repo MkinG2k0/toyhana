@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
-import { requireAuth } from '@/lib/auth-guard'
-import { success, error, serverError } from '@/lib/api-response'
-import { uploadToS3 } from '@/lib/s3'
+import { requireAuth } from '@/shared/lib/auth-guard'
+import { success, error, serverError } from '@/shared/api'
+import { uploadToS3 } from '@/shared/lib/s3'
 import sharp from 'sharp'
 
 const MAX_WIDTH = 1200

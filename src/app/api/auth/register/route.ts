@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { registerSchema } from "@/validators/auth"
-import { created, error, serverError } from "@/lib/api-response"
+import { prisma } from "@/shared/lib/prisma"
+import { registerSchema } from "@/features/auth-sms/model/schema"
+import { created, error, serverError } from "@/shared/api"
 
 export async function POST(req: NextRequest) {
   try {

@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { bookingListSchema, createBookingSchema } from "@/validators/booking"
-import { success, created, error, notFound, serverError } from "@/lib/api-response"
-import { requireAuth } from "@/lib/auth-guard"
+import { prisma } from "@/shared/lib/prisma"
+import { bookingListSchema } from "@/shared/api/validators"
+import { createBookingSchema } from "@/features/booking-create/model/schema"
+import { success, created, error, notFound, serverError } from "@/shared/api"
+import { requireAuth } from "@/shared/lib/auth-guard"
 
 export async function POST(req: NextRequest) {
   try {

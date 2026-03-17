@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { EmptyState } from "@/components/shared/empty-state";
+import { auth } from "@/shared/lib/auth";
+import { prisma } from "@/shared/lib/prisma";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Badge } from "@/shared/ui/badge";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import { CalendarDays, MapPin, Users } from "lucide-react";
-import { formatDate, formatPrice } from "@/lib/utils";
+import { formatDate, formatPrice } from "@/shared/lib/utils";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Ожидает подтверждения",

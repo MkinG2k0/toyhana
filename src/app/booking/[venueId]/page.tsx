@@ -1,12 +1,11 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { BookingForm } from "@/components/booking/booking-form";
-import { Button } from "@/components/ui/button";
-import { formatPrice } from "@/lib/utils";
+import { prisma } from "@/shared/lib/prisma";
+import { Footer } from "@/widgets/layout";
+import { BookingForm } from "@/features/booking-create";
+import { Button } from "@/shared/ui/button";
+import { formatPrice } from "@/shared/lib/utils";
 import { ArrowLeft, Users, MapPin } from "lucide-react";
 
 import type { Metadata } from "next";

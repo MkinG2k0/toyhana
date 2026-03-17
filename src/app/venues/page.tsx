@@ -1,19 +1,18 @@
-"use client";
+"use client"
 
-import { useState, useCallback } from "react";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { VenueCard } from "@/components/venues/venue-card";
-import { VenueFilters } from "@/components/venues/venue-filters";
-import { EmptyState } from "@/components/shared/empty-state";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useCallback } from "react"
+import { Footer } from "@/widgets/layout"
+import { VenueCard } from "@/entities/venue"
+import { VenueFilters } from "@/features/venue-search"
+import { EmptyState } from "@/shared/ui/EmptyState"
+import { Skeleton } from "@/shared/ui/skeleton"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/ui/select"
 import {
   Pagination,
   PaginationContent,
@@ -21,14 +20,10 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
-import { useVenues } from "@/hooks/use-venues";
-import { pluralize } from "@/lib/utils";
-
-import type {
-  VenueFilters as VenueFiltersType,
-  VenueSortOption,
-} from "@/types/venue";
+} from "@/shared/ui/pagination"
+import { useVenues } from "@/entities/venue"
+import { pluralize } from "@/shared/lib/utils"
+import type { VenueFilters as VenueFiltersType, VenueSortOption } from "@/entities/venue"
 
 const SORT_OPTIONS: { value: VenueSortOption; label: string }[] = [
   { value: "popular", label: "Популярные" },
@@ -36,35 +31,35 @@ const SORT_OPTIONS: { value: VenueSortOption; label: string }[] = [
   { value: "price_asc", label: "Сначала дешевле" },
   { value: "price_desc", label: "Сначала дороже" },
   { value: "newest", label: "Новые" },
-];
+]
 
 export default function VenuesPage() {
   const [filters, setFilters] = useState<VenueFiltersType>({
     page: 1,
     sort: "popular",
-  });
+  })
 
-  const { data, isLoading } = useVenues(filters);
+  const { data, isLoading } = useVenues(filters)
 
   const handleFiltersChange = useCallback((newFilters: VenueFiltersType) => {
-    setFilters(newFilters);
-  }, []);
+    setFilters(newFilters)
+  }, [])
 
   const handleSortChange = useCallback(
     (sort: string | null) => {
-      if (!sort) return;
-      setFilters({ ...filters, sort: sort as VenueSortOption, page: 1 });
+      if (!sort) return
+      setFilters({ ...filters, sort: sort as VenueSortOption, page: 1 })
     },
     [filters],
-  );
+  )
 
   const handlePageChange = useCallback(
     (page: number) => {
-      setFilters({ ...filters, page });
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      setFilters({ ...filters, page })
+      window.scrollTo({ top: 0, behavior: "smooth" })
     },
     [filters],
-  );
+  )
 
   return (
     <>
@@ -157,12 +152,12 @@ export default function VenuesPage() {
       </main>
       <Footer />
     </>
-  );
+  )
 }
 
 const VenueCardSkeleton = () => (
   <div className="overflow-hidden rounded-xl border border-surface-200">
-    <Skeleton className="aspect-[4/3] w-full" />
+    <Skeleton className="aspect-4/3 w-full" />
     <div className="space-y-3 p-4">
       <Skeleton className="h-5 w-3/4" />
       <Skeleton className="h-4 w-1/2" />
@@ -173,4 +168,4 @@ const VenueCardSkeleton = () => (
       <Skeleton className="h-6 w-24" />
     </div>
   </div>
-);
+)

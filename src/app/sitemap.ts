@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@/shared/lib/prisma"
 import type { MetadataRoute } from "next"
 
 const BASE_URL = process.env.NEXTAUTH_URL ?? "https://toykhana.ru"

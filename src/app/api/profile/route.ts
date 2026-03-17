@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { success, error, serverError } from "@/lib/api-response"
-import { requireAuth } from "@/lib/auth-guard"
+import { prisma } from "@/shared/lib/prisma"
+import { success, error, serverError } from "@/shared/api"
+import { requireAuth } from "@/shared/lib/auth-guard"
 import { z } from "zod/v4"
 
 const updateProfileSchema = z.object({

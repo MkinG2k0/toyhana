@@ -1,13 +1,12 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { SearchBar } from "@/components/shared/search-bar";
-import { PostRegisterRoleSync } from "@/components/shared/post-register-role-sync";
-import { VenueCard } from "@/components/venues/venue-card";
-import { prisma } from "@/lib/prisma";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent } from "@/shared/ui/card";
+import { Badge } from "@/shared/ui/badge";
+import { Footer } from "@/widgets/layout";
+import { SearchBar } from "@/shared/ui/SearchBar";
+import { PostRegisterRoleSync } from "@/shared/ui/PostRegisterRoleSync";
+import { VenueCard } from "@/entities/venue";
+import { prisma } from "@/shared/lib/prisma";
 import {
   Building2,
   Star,
@@ -19,7 +18,7 @@ import {
   Briefcase,
 } from "lucide-react";
 
-import type { VenueCard as VenueCardType } from "@/types/venue";
+import type { VenueCardData as VenueCardType } from "@/entities/venue";
 
 export const dynamic = "force-dynamic";
 

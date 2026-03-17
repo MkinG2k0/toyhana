@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { updateBookingStatusSchema } from "@/validators/booking"
-import { success, error, notFound, serverError } from "@/lib/api-response"
-import { requireAuth } from "@/lib/auth-guard"
+import { prisma } from "@/shared/lib/prisma"
+import { updateBookingStatusSchema } from "@/shared/api/validators"
+import { success, error, notFound, serverError } from "@/shared/api"
+import { requireAuth } from "@/shared/lib/auth-guard"
 
 interface RouteContext {
   params: Promise<{ id: string }>

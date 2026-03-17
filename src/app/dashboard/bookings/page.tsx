@@ -7,20 +7,21 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { EmptyState } from "@/components/shared/empty-state"
-import { Skeleton } from "@/components/ui/skeleton"
-import { useBookings, useUpdateBookingStatus } from "@/hooks/use-bookings"
-import { formatDate, formatDateShort } from "@/lib/utils"
+} from "@/shared/ui/select"
+import { Card, CardContent } from "@/shared/ui/card"
+import { Button } from "@/shared/ui/button"
+import { Badge } from "@/shared/ui/badge"
+import { EmptyState } from "@/shared/ui/EmptyState"
+import { Skeleton } from "@/shared/ui/skeleton"
+import { useBookings } from "@/entities/booking"
+import { useUpdateBookingStatus } from "@/features/booking-manage"
+import { formatDate, formatDateShort } from "@/shared/lib/utils"
 import { CalendarDays, Check, X } from "lucide-react"
 import {
   BOOKING_STATUS_LABELS,
   EVENT_TYPE_LABELS,
   type BookingStatus,
-} from "@/types/booking"
+} from "@/entities/booking"
 
 const STATUS_OPTIONS: { value: "all" | BookingStatus; label: string }[] = [
   { value: "all", label: "Все статусы" },
@@ -32,7 +33,7 @@ const STATUS_OPTIONS: { value: "all" | BookingStatus; label: string }[] = [
 
 export default function DashboardBookingsPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | BookingStatus>("all")
-  const filters: { status?: BookingStatus; page: number; limit: number } = {
+  const filters = {
     status: statusFilter === "all" ? undefined : statusFilter,
     page: 1,
     limit: 20,
@@ -83,19 +84,13 @@ export default function DashboardBookingsPage() {
             {data?.total ?? 0} заявок
           </p>
         </div>
-        <Select
-          value={statusFilter || "all"}
-          onValueChange={handleStatusChange}
-        >
+        <Select value={statusFilter || "all"} onValueChange={handleStatusChange}>
           <SelectTrigger className="w-44">
             <SelectValue placeholder="Фильтр по статусу" />
           </SelectTrigger>
           <SelectContent>
             {STATUS_OPTIONS.map((o) => (
-              <SelectItem
-                key={o.value || "all"}
-                value={o.value || "all"}
-              >
+              <SelectItem key={o.value || "all"} value={o.value || "all"}>
                 {o.label}
               </SelectItem>
             ))}
@@ -117,15 +112,13 @@ export default function DashboardBookingsPage() {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-semibold">
-                        {booking.venue.name}
-                      </h3>
+                      <h3 className="font-semibold">{booking.venue.name}</h3>
                       <Badge variant="secondary">
-                        {BOOKING_STATUS_LABELS[booking.status as keyof typeof BOOKING_STATUS_LABELS] ?? booking.status}
+                        {BOOKING_STATUS_LABELS[booking.status] ?? booking.status}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
                         {formatDateShort(booking.eventDate)} ·{" "}
-                        {EVENT_TYPE_LABELS[booking.eventType as keyof typeof EVENT_TYPE_LABELS] ?? booking.eventType}
+                        {EVENT_TYPE_LABELS[booking.eventType] ?? booking.eventType}
                       </span>
                     </div>
                     <p className="mt-1 text-sm">

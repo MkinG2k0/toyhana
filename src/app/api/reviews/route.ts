@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server"
 
-import { prisma } from "@/lib/prisma"
-import { success, created, error, serverError } from "@/lib/api-response"
-import { requireAuth } from "@/lib/auth-guard"
-import { createReviewSchema } from "@/validators/review"
+import { prisma } from "@/shared/lib/prisma"
+import { success, created, error, serverError } from "@/shared/api"
+import { requireAuth } from "@/shared/lib/auth-guard"
+import { createReviewSchema } from "@/features/review-submit/model/schema"
 
 export async function GET(req: NextRequest) {
   try {

@@ -1,9 +1,10 @@
 import { NextRequest } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { venueListSchema, createVenueSchema } from "@/validators/venue"
-import { success, created, error, serverError } from "@/lib/api-response"
-import { requireAuth } from "@/lib/auth-guard"
-import { slugify } from "@/lib/utils"
+import { prisma } from "@/shared/lib/prisma"
+import { venueListSchema } from "@/shared/api/validators"
+import { createVenueSchema } from "@/features/venue-edit/model/schema"
+import { success, created, error, serverError } from "@/shared/api"
+import { requireAuth } from "@/shared/lib/auth-guard"
+import { slugify } from "@/shared/lib/utils"
 
 import type { Prisma } from "../../../../generated/prisma/client"
 

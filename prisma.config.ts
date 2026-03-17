@@ -3,7 +3,7 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
-import { normalizeDatabaseUrl } from "./src/lib/database-url";
+import { normalizeDatabaseUrl } from "./src/shared/lib/database-url";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",

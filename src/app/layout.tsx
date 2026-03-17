@@ -1,10 +1,10 @@
 import { Golos_Text, Playfair_Display, Roboto } from "next/font/google";
-import { Toaster } from "@/components/ui/sonner";
-import { Providers } from "@/providers";
+import { Toaster } from "@/shared/ui/sonner";
+import { Providers } from "@/shared/providers";
 import "./globals.css";
 
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/header";
+import { Header } from "@/widgets/layout";
 
 const roboto = Roboto({
   variable: "--font-roboto",

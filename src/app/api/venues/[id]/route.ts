@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { updateVenueSchema } from "@/validators/venue";
-import { success, error, notFound, serverError } from "@/lib/api-response";
-import { requireAuth } from "@/lib/auth-guard";
+import { prisma } from "@/shared/lib/prisma";
+import { updateVenueSchema } from "@/features/venue-edit/model/schema";
+import { success, error, notFound, serverError } from "@/shared/api";
+import { requireAuth } from "@/shared/lib/auth-guard";
 
 interface RouteContext {
   params: Promise<{ id: string }>;

@@ -7,24 +7,24 @@ import Link from "next/link"
 import { toast } from "sonner"
 import {
   createVenueSchema,
-  type CreateVenueInput,
-} from "@/validators/venue"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+} from "@/features/venue-edit/model/schema"
+import type { VenueFormValues as CreateVenueInput } from "@/features/venue-edit/model/types"
+import { Button } from "@/shared/ui/button"
+import { Input } from "@/shared/ui/input"
+import { Textarea } from "@/shared/ui/textarea"
+import { Label } from "@/shared/ui/label"
+import { Checkbox } from "@/shared/ui/checkbox"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/shared/ui/card"
 import { ArrowLeft } from "lucide-react"
 import {
   ImageUpload,
   type UploadedImage,
-} from "@/components/shared/image-upload"
+} from "@/shared/ui/ImageUpload"
 
 const DEFAULT_VALUES: Partial<CreateVenueInput> = {
   city: "Махачкала",

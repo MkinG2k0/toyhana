@@ -25,6 +25,14 @@ export const Header = () => {
           >
             Каталог залов
           </Link>
+          {session?.user?.role === "CLIENT" && (
+            <Link
+              href="/bookings"
+              className="text-sm font-medium text-foreground/80 transition-colors hover:text-brand-500"
+            >
+              Мои бронирования
+            </Link>
+          )}
           {session?.user?.role === "OWNER" && (
             <Link
               href="/dashboard"

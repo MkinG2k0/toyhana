@@ -34,10 +34,12 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Временно: заявка на аккаунт владельца сразу одобрена, без админки.
     const request = await prisma.venuePlacementRequest.create({
       data: {
         description: parsed.data.description,
         userId: result.user.id,
+        status: "APPROVED",
       },
     })
 

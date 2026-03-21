@@ -1,14 +1,14 @@
-import { PrismaClient } from "../../generated/prisma/client"
-import { PrismaPg } from "@prisma/adapter-pg"
+import { PrismaClient } from "../../generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-import { normalizeDatabaseUrl } from "../../src/shared/lib/database-url"
+import { normalizeDatabaseUrl } from "../../src/shared/lib/database-url";
 
 export const createScriptPrismaClient = (): PrismaClient => {
-  const raw = process.env.DATABASE_URL ?? ""
-  const connectionString = normalizeDatabaseUrl(raw)
+  const raw = process.env.DATABASE_URL ?? "";
+  const connectionString = normalizeDatabaseUrl(raw);
   if (!connectionString) {
-    throw new Error("Задайте DATABASE_URL в окружении или в .env")
+    throw new Error("Задайте DATABASE_URL в окружении или в .env");
   }
-  const adapter = new PrismaPg({ connectionString })
-  return new PrismaClient({ adapter })
-}
+  const adapter = new PrismaPg({ connectionString: raw });
+  return new PrismaClient({ adapter });
+};

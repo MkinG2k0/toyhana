@@ -1,14 +1,14 @@
-import { prisma } from "@/shared/lib/prisma"
-import type { VenueListParams } from "@/shared/api/validators"
-import type { VenueListResponse } from "../model/types"
-import type { Prisma } from "../../../../generated/prisma/client"
+import { prisma } from "@/shared/lib/prisma";
+import type { VenueListParams } from "@/shared/api/validators";
+import type { VenueListResponse } from "../model/types";
+import type { Prisma } from "../../../../generated/prisma/client";
 
 const DEFAULT_PARAMS: VenueListParams = {
   city: "Махачкала",
   sort: "popular",
   page: 1,
   limit: 12,
-}
+};
 
 export async function getVenuesList(
   params: Partial<VenueListParams> = {},
@@ -29,7 +29,7 @@ export async function getVenuesList(
     sort = DEFAULT_PARAMS.sort,
     page = DEFAULT_PARAMS.page,
     limit = DEFAULT_PARAMS.limit,
-  } = { ...DEFAULT_PARAMS, ...params }
+  } = { ...DEFAULT_PARAMS, ...params };
 
   const where: Prisma.VenueWhereInput = {
     isActive: true,
@@ -47,7 +47,7 @@ export async function getVenuesList(
     ...(date && {
       blockedDates: { none: { date: new Date(date) } },
     }),
-  }
+  };
 
   const orderBy: Prisma.VenueOrderByWithRelationInput =
     sort === "price_asc"
@@ -58,9 +58,9 @@ export async function getVenuesList(
           ? { averageRating: "desc" }
           : sort === "newest"
             ? { createdAt: "desc" }
-            : { viewCount: "desc" }
+            : { viewCount: "desc" };
 
-  const skip = (page - 1) * limit
+  const skip = (page - 1) * limit;
 
   const [venues, total] = await Promise.all([
     prisma.venue.findMany({
@@ -93,12 +93,12 @@ export async function getVenuesList(
       },
     }),
     prisma.venue.count({ where }),
-  ])
+  ]);
 
   return {
     venues,
     total,
     page,
     totalPages: Math.ceil(total / limit),
-  }
+  };
 }

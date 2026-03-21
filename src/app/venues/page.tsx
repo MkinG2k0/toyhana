@@ -26,8 +26,8 @@ interface VenuesPageProps {
 export default async function VenuesPage({ searchParams }: VenuesPageProps) {
   const raw = await searchParams
   const listParams = parseRawSearchParamsToVenueListParams(raw)
-  const initialData = await getVenuesList(listParams)
   const filtersSignature = venueListParamsSignature(listParams)
+  const initialData = await getVenuesList(listParams)
 
   return (
     <>

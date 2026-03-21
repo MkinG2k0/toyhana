@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Image from "next/image"
-import { Dialog, DialogContent } from "@/shared/ui/dialog"
-import { Button } from "@/shared/ui/button"
-import { ChevronLeft, ChevronRight, X, Images } from "lucide-react"
-import { cn } from "@/shared/lib/utils"
-import type { VenuePhoto } from "@/entities/venue"
+import { useState } from "react";
+import Image from "next/image";
+import { Dialog, DialogContent } from "@/shared/ui/dialog";
+import { Button } from "@/shared/ui/button";
+import { ChevronLeft, ChevronRight, X, Images } from "lucide-react";
+import { cn } from "@/shared/lib/utils";
+import type { VenuePhoto } from "@/entities/venue";
 
 interface VenueGalleryProps {
-  photos: VenuePhoto[]
-  venueName: string
-  className?: string
+  photos: VenuePhoto[];
+  venueName: string;
+  className?: string;
 }
 
 export const VenueGallery = ({
@@ -19,46 +19,53 @@ export const VenueGallery = ({
   venueName,
   className,
 }: VenueGalleryProps) => {
-  const [lightboxOpen, setLightboxOpen] = useState(false)
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const displayPhotos = photos.slice(0, 5)
-  const hasMore = photos.length > 5
+  const displayPhotos = photos.slice(0, 5);
+  const hasMore = photos.length > 5;
+  const isSinglePhoto = photos.length === 1;
 
   const handlePrev = () =>
-    setCurrentIndex((i) => (i === 0 ? photos.length - 1 : i - 1))
+    setCurrentIndex((i) => (i === 0 ? photos.length - 1 : i - 1));
   const handleNext = () =>
-    setCurrentIndex((i) => (i === photos.length - 1 ? 0 : i + 1))
+    setCurrentIndex((i) => (i === photos.length - 1 ? 0 : i + 1));
 
   const handleOpen = (index: number) => {
-    setCurrentIndex(index)
-    setLightboxOpen(true)
-  }
+    setCurrentIndex(index);
+    setLightboxOpen(true);
+  };
 
   if (photos.length === 0) {
     return (
       <div
         className={cn(
           "flex h-64 items-center justify-center rounded-xl bg-surface-100 md:h-96",
-          className
+          className,
         )}
       >
         <p className="text-muted-foreground">Нет фотографий</p>
       </div>
-    )
+    );
   }
 
   return (
     <>
       <div
         className={cn(
-          "grid grid-cols-1 gap-2 md:grid-cols-4 md:grid-rows-2",
-          className
+          "grid grid-cols-1 gap-2",
+          !isSinglePhoto && "md:grid-cols-4 md:grid-rows-2",
+          className,
         )}
       >
         <button
           onClick={() => handleOpen(0)}
-          className="relative col-span-1 row-span-2 aspect-4/3 overflow-hidden rounded-l-xl md:col-span-2 md:aspect-auto"
+          className={cn(
+            "relative col-span-1 overflow-hidden aspect-16/9",
+            isSinglePhoto
+              ? "rounded-xl md:col-span-4"
+              : "row-span-2 rounded-l-xl md:col-span-2 md:aspect-auto",
+          )}
         >
           <Image
             src={displayPhotos[0]?.url ?? ""}
@@ -77,7 +84,7 @@ export const VenueGallery = ({
             className={cn(
               "relative hidden aspect-4/3 overflow-hidden md:block",
               i === 1 && "rounded-tr-xl",
-              i === 3 && "rounded-br-xl"
+              i === 3 && "rounded-br-xl",
             )}
           >
             <Image
@@ -156,5 +163,5 @@ export const VenueGallery = ({
         </DialogContent>
       </Dialog>
     </>
-  )
-}
+  );
+};

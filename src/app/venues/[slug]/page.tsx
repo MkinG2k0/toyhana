@@ -23,11 +23,9 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const venues = await prisma.venue.findMany({
-    where: { isActive: true },
-    select: { slug: true },
-  })
-  return venues.map((v) => ({ slug: v.slug }))
+  // Не прогреваем все slug при `next build`: десятки параллельных воркеров + Prisma
+  // дают обрыв соединения с БД и таймауты. Страницы собираются по первому запросу (ISR).
+  return []
 }
 
 const getVenue = async (slug: string) => {

@@ -63,7 +63,7 @@ export const VenueGallery = ({
           className={cn(
             "relative col-span-1 overflow-hidden aspect-16/9",
             isSinglePhoto
-              ? "rounded-xl md:col-span-4"
+              ? "rounded-xl md:col-span-4 md:aspect-venue-gallery"
               : "row-span-2 rounded-l-xl md:col-span-2 md:aspect-auto",
           )}
         >

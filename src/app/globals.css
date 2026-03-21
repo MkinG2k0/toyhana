@@ -63,6 +63,9 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Совпадает с высотой md-галереи (2 ряда превью 4:3 в сетке 4×2) */
+  --aspect-venue-gallery: 8 / 3;
 }
 
 :root {

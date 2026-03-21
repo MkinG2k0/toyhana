@@ -1,16 +1,8 @@
-import { PrismaClient } from "../generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import "dotenv/config";
 
-const createPrismaClient = () => {
-  const raw = process.env.DATABASE_URL ?? "";
+import { createScriptPrismaClient } from "./lib/script-prisma-client";
 
-  const adapter = new PrismaPg({
-    connectionString:
-      "postgres://34bfca585dcfa47b923924b9c92936daec3494586dd993ba272879dacf53a9a9:sk_xEpGmJyxRqS5y3_tIGtcU@db.prisma.io:5432/postgres?sslmode=require",
-  });
-  return new PrismaClient({ adapter });
-};
-const prisma = createPrismaClient();
+const prisma = createScriptPrismaClient();
 
 const VENUES_DATA = [
   {

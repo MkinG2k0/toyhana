@@ -40,4 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-/generated/prisma
+/generated
+
+# локальный дамп БД (ПДн) — не коммитить
+/db-export/

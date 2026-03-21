@@ -16,6 +16,7 @@ const getOwnerVenues = async (ownerId: string) => {
         slug: true,
         name: true,
         isActive: true,
+        isApproved: true,
         reviewCount: true,
         pricePerPerson: true,
         capacityMax: true,

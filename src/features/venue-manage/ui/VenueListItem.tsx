@@ -11,6 +11,7 @@ export interface VenueItem {
   slug: string
   name: string
   isActive: boolean
+  isApproved: boolean
   reviewCount: number
   pricePerPerson: number
   capacityMax: number
@@ -32,7 +33,7 @@ export const VenueListItem = ({
   const mainPhoto = venue.photos[0]?.url ?? "/images/venue-placeholder.webp"
 
   return (
-    <Card className="overflow-hidden border-surface-200">
+    <Card className="overflow-hidden border-surface-200 py-0">
       <div className="flex flex-col gap-4 p-4 sm:flex-row">
         <div className="relative h-32 w-full shrink-0 overflow-hidden rounded-lg sm:h-24 sm:w-40">
           <Image
@@ -55,16 +56,26 @@ export const VenueListItem = ({
               <span>·</span>
               <span>{venue._count.bookings} заявок</span>
             </div>
-            <div className="mt-2">
+            <div className="mt-2 flex flex-wrap gap-2">
               <Badge
                 variant={venue.isActive ? "default" : "secondary"}
                 className={venue.isActive ? "bg-green-600 hover:bg-green-600" : ""}
               >
                 {venue.isActive ? "Активен" : "Скрыт"}
               </Badge>
+              <Badge
+                variant={venue.isApproved ? "outline" : "secondary"}
+                className={
+                  venue.isApproved
+                    ? "border-green-500 text-green-700"
+                    : "border-orange-300 text-orange-700"
+                }
+              >
+                {venue.isApproved ? "Одобрен" : "На проверке"}
+              </Badge>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2">
             <Button
               variant="outline"
               size="sm"

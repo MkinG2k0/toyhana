@@ -1,10 +1,14 @@
 import { Golos_Text, Playfair_Display, Roboto } from "next/font/google";
+import type { Metadata } from "next";
 import { Toaster } from "@/shared/ui/sonner";
 import { Providers } from "@/shared/providers";
-import "./globals.css";
-
-import type { Metadata } from "next";
+import {
+  SITE_NAME,
+  SITE_NAME_KEYWORD,
+  SITE_TITLE_DEFAULT,
+} from "@/shared/lib/site";
 import { Header } from "@/widgets/layout";
+import "./globals.css";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -27,8 +31,8 @@ const playfairDisplay = Playfair_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: "Тойхана — Банкетные залы Махачкалы и Дагестана",
-    template: "%s | Тойхана",
+    default: SITE_TITLE_DEFAULT,
+    template: `%s | ${SITE_NAME}`,
   },
   description:
     "Найдите идеальный банкетный зал для свадьбы, помолвки или мероприятия в Махачкале. Реальные цены, отзывы, бронирование онлайн.",
@@ -37,7 +41,7 @@ export const metadata: Metadata = {
     "свадебный зал",
     "Махачкала",
     "Дагестан",
-    "тойхана",
+    SITE_NAME_KEYWORD,
     "бронирование зала",
     "свадьба",
   ],

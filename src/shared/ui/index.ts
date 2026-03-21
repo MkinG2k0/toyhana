@@ -18,6 +18,11 @@ export { EmptyState } from "./EmptyState"
 export { GoogleSignInButton } from "./GoogleSignInButton"
 export { ImageUpload } from "./ImageUpload"
 export { Input } from "./input"
+export {
+  OptionsSelect,
+  type OptionsSelectProps,
+  type SelectOption,
+} from "./OptionsSelect"
 export { Label } from "./label"
 export {
   Pagination,

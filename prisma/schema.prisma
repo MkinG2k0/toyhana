@@ -32,9 +32,10 @@ model User {
   telegramChatId String?
   whatsappPhone  String?
 
-  venues   Venue[]
-  bookings Booking[]
-  reviews  Review[]
+  venues                  Venue[]
+  bookings                Booking[]
+  reviews                 Review[]
+  venuePlacementRequests  VenuePlacementRequest[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -90,6 +91,7 @@ model Venue {
 
   isActive     Boolean   @default(true)
   isVerified   Boolean   @default(false)
+  isApproved   Boolean   @default(false)
   isPremium    Boolean   @default(false)
   premiumUntil DateTime?
 
@@ -103,7 +105,8 @@ model Venue {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([city, isActive])
+  @@index([city, isActive, isApproved])
+  @@index([isApproved, isActive])
   @@index([pricePerPerson])
   @@index([capacityMax])
   @@index([averageRating])
@@ -185,6 +188,31 @@ enum EventType {
   CORPORATE
   FUNERAL
   OTHER
+}
+
+// ============ VENUE PLACEMENT REQUESTS ============
+
+model VenuePlacementRequest {
+  id           String                      @id @default(cuid())
+  description  String                      @db.Text
+  status       VenuePlacementRequestStatus @default(PENDING)
+  adminComment String?                     @db.Text
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([userId])
+  @@map("venue_placement_requests")
+}
+
+enum VenuePlacementRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 // ============ REVIEWS ============

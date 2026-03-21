@@ -1,27 +1,19 @@
-"use client"
+"use client";
 
-import { useState, useCallback } from "react"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select"
-import { Card, CardContent } from "@/shared/ui/card"
-import { Button } from "@/shared/ui/button"
-import { Badge } from "@/shared/ui/badge"
-import { EmptyState } from "@/shared/ui/EmptyState"
-import { Skeleton } from "@/shared/ui/skeleton"
-import { useBookings } from "@/entities/booking"
-import { useUpdateBookingStatus } from "@/features/booking-manage"
-import { formatDate, formatDateShort } from "@/shared/lib/utils"
-import { CalendarDays, Check, X } from "lucide-react"
+import { useState, useCallback } from "react";
+import { Card, CardContent } from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
+import { Badge } from "@/shared/ui/badge";
+import { EmptyState, OptionsSelect, Skeleton } from "@/shared/ui";
+import { useBookings } from "@/entities/booking";
+import { useUpdateBookingStatus } from "@/features/booking-manage";
+import { formatDateShort } from "@/shared/lib/utils";
+import { CalendarDays, Check, X } from "lucide-react";
 import {
   BOOKING_STATUS_LABELS,
   EVENT_TYPE_LABELS,
   type BookingStatus,
-} from "@/entities/booking"
+} from "@/entities/booking";
 
 const STATUS_OPTIONS: { value: "all" | BookingStatus; label: string }[] = [
   { value: "all", label: "Все статусы" },
@@ -29,36 +21,38 @@ const STATUS_OPTIONS: { value: "all" | BookingStatus; label: string }[] = [
   { value: "CONFIRMED", label: "Подтверждена" },
   { value: "REJECTED", label: "Отклонена" },
   { value: "COMPLETED", label: "Завершена" },
-]
+];
 
 export default function DashboardBookingsPage() {
-  const [statusFilter, setStatusFilter] = useState<"all" | BookingStatus>("all")
+  const [statusFilter, setStatusFilter] = useState<"all" | BookingStatus>(
+    "all",
+  );
   const filters = {
     status: statusFilter === "all" ? undefined : statusFilter,
     page: 1,
     limit: 20,
-  }
+  };
 
-  const { data, isLoading } = useBookings(filters)
-  const updateStatus = useUpdateBookingStatus()
+  const { data, isLoading } = useBookings(filters);
+  const updateStatus = useUpdateBookingStatus();
 
   const handleStatusChange = useCallback((value: string | null) => {
-    setStatusFilter((value ?? "all") as "all" | BookingStatus)
-  }, [])
+    setStatusFilter((value ?? "all") as "all" | BookingStatus);
+  }, []);
 
   const handleConfirm = useCallback(
     (id: string) => {
-      updateStatus.mutate({ id, status: "CONFIRMED" })
+      updateStatus.mutate({ id, status: "CONFIRMED" });
     },
-    [updateStatus]
-  )
+    [updateStatus],
+  );
 
   const handleReject = useCallback(
     (id: string) => {
-      updateStatus.mutate({ id, status: "REJECTED" })
+      updateStatus.mutate({ id, status: "REJECTED" });
     },
-    [updateStatus]
-  )
+    [updateStatus],
+  );
 
   if (isLoading) {
     return (
@@ -70,7 +64,7 @@ export default function DashboardBookingsPage() {
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -84,18 +78,13 @@ export default function DashboardBookingsPage() {
             {data?.total ?? 0} заявок
           </p>
         </div>
-        <Select value={statusFilter || "all"} onValueChange={handleStatusChange}>
-          <SelectTrigger className="w-44">
-            <SelectValue placeholder="Фильтр по статусу" />
-          </SelectTrigger>
-          <SelectContent>
-            {STATUS_OPTIONS.map((o) => (
-              <SelectItem key={o.value || "all"} value={o.value || "all"}>
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <OptionsSelect
+          value={statusFilter}
+          onValueChange={handleStatusChange}
+          options={STATUS_OPTIONS}
+          placeholder="Фильтр по статусу"
+          className="w-44"
+        />
       </div>
 
       {!data?.bookings.length ? (
@@ -114,11 +103,13 @@ export default function DashboardBookingsPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-semibold">{booking.venue.name}</h3>
                       <Badge variant="secondary">
-                        {BOOKING_STATUS_LABELS[booking.status] ?? booking.status}
+                        {BOOKING_STATUS_LABELS[booking.status] ??
+                          booking.status}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
                         {formatDateShort(booking.eventDate)} ·{" "}
-                        {EVENT_TYPE_LABELS[booking.eventType] ?? booking.eventType}
+                        {EVENT_TYPE_LABELS[booking.eventType] ??
+                          booking.eventType}
                       </span>
                     </div>
                     <p className="mt-1 text-sm">
@@ -162,5 +153,5 @@ export default function DashboardBookingsPage() {
         </div>
       )}
     </>
-  )
+  );
 }

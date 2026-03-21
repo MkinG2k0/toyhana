@@ -10,6 +10,7 @@ import { Button } from "@/shared/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs"
 import { Separator } from "@/shared/ui/separator"
 import { Star, Users, MapPin, Phone, Shield, Crown } from "lucide-react"
+import { SITE_NAME } from "@/shared/lib/site"
 import { formatPrice, formatPhone } from "@/shared/lib/utils"
 import type { Metadata } from "next"
 import type { VenuePhoto } from "@/entities/venue"
@@ -62,7 +63,7 @@ export async function generateMetadata({
     title: `${venue.name} — от ${formatPrice(venue.pricePerPerson)}/чел, до ${venue.capacityMax} гостей`,
     description: venue.description.slice(0, 160),
     openGraph: {
-      title: `${venue.name} | Тойхана`,
+      title: `${venue.name} | ${SITE_NAME}`,
       description: venue.description.slice(0, 160),
       images: venue.photos[0]?.url ? [venue.photos[0].url] : [],
     },

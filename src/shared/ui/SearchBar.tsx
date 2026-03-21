@@ -1,17 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState, type ChangeEvent } from "react"
 import { useRouter } from "next/navigation"
+import { Search } from "lucide-react"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select"
-import { Search } from "lucide-react"
+import { OptionsSelect } from "@/shared/ui"
 import { cn } from "@/shared/lib/utils"
 
 const DISTRICTS = [
@@ -20,9 +14,17 @@ const DISTRICTS = [
   "Ленинский",
   "Ленинкент",
   "Редукторный",
-]
+] as const
 
 const ALL_DISTRICTS_VALUE = "Все районы"
+
+const DISTRICT_SELECT_OPTIONS = [
+  { value: ALL_DISTRICTS_VALUE, label: ALL_DISTRICTS_VALUE },
+  ...DISTRICTS.map((d) => ({ value: d, label: d })),
+]
+
+const searchBarOuterClass =
+  "flex gap-3 rounded-2xl text-black bg-white p-3 shadow-lg md:items-center md:gap-2 md:rounded-full md:p-2"
 
 interface SearchBarProps {
   className?: string
@@ -33,43 +35,46 @@ export const SearchBar = ({ className }: SearchBarProps) => {
   const [guestCount, setGuestCount] = useState("")
   const [district, setDistrict] = useState(ALL_DISTRICTS_VALUE)
 
-  const handleSearch = () => {
+  const handleGuestCountChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setGuestCount(event.target.value)
+    },
+    [],
+  )
+
+  const handleDistrictChange = useCallback((value: string | null) => {
+    setDistrict(value ?? ALL_DISTRICTS_VALUE)
+  }, [])
+
+  const handleSearch = useCallback(() => {
     const params = new URLSearchParams()
-    if (guestCount) params.set("capacityMin", guestCount)
-    if (district && district !== ALL_DISTRICTS_VALUE) params.set("district", district)
-    router.push(`/venues?${params.toString()}`)
-  }
+    const parsed = Number(guestCount.trim())
+    if (Number.isFinite(parsed) && parsed > 0) {
+      params.set("capacityMin", String(Math.floor(parsed)))
+    }
+    if (district !== ALL_DISTRICTS_VALUE) {
+      params.set("district", district)
+    }
+    const qs = params.toString()
+    router.push(qs ? `/venues?${qs}` : "/venues")
+  }, [district, guestCount, router])
 
   return (
-    <div
-      className={cn(
-        "flex gap-3 rounded-2xl text-black bg-white p-3 shadow-lg md:items-center md:gap-2 md:rounded-full md:p-2",
-        className
-      )}
-    >
+    <div className={cn(searchBarOuterClass, className)}>
       <Input
         type="number"
         placeholder="Кол-во гостей"
         value={guestCount}
-        onChange={(e) => setGuestCount(e.target.value)}
+        onChange={handleGuestCountChange}
         className="border-0 bg-surface-50 md:w-40"
       />
-      <Select
+      <OptionsSelect
         value={district}
-        onValueChange={(v: string | null) => setDistrict(v ?? ALL_DISTRICTS_VALUE)}
-      >
-        <SelectTrigger className="border-0 bg-surface-50 md:w-44">
-          <SelectValue placeholder="Район" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={ALL_DISTRICTS_VALUE}>Все районы</SelectItem>
-          {DISTRICTS.map((d) => (
-            <SelectItem key={d} value={d}>
-              {d}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        onValueChange={handleDistrictChange}
+        options={DISTRICT_SELECT_OPTIONS}
+        placeholder="Район"
+        className="border-0 bg-surface-50 md:w-44"
+      />
       <Button
         onClick={handleSearch}
         className="bg-brand-500 hover:bg-brand-600 md:rounded-full"

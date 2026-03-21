@@ -10,6 +10,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/shared/ui/sheet"
+import { SITE_NAME } from "@/shared/lib/site"
 import { Button } from "@/shared/ui/button"
 import { Separator } from "@/shared/ui/separator"
 import { Menu } from "lucide-react"
@@ -34,7 +35,7 @@ export const MobileNav = ({ isLoggedIn, userRole }: MobileNavProps) => {
       <SheetContent side="right" className="w-72">
         <SheetHeader>
           <SheetTitle className="font-display text-brand-600">
-            Тойхана
+            {SITE_NAME}
           </SheetTitle>
         </SheetHeader>
         <nav className="mt-6 flex flex-col gap-2">
@@ -52,6 +53,15 @@ export const MobileNav = ({ isLoggedIn, userRole }: MobileNavProps) => {
               className="rounded-md px-3 py-2 text-sm font-medium hover:bg-surface-100"
             >
               Мой кабинет
+            </Link>
+          )}
+          {isLoggedIn && userRole === "ADMIN" && (
+            <Link
+              href="/admin"
+              onClick={close}
+              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-surface-100"
+            >
+              Администрирование
             </Link>
           )}
           <Separator className="my-2" />
@@ -85,7 +95,9 @@ export const MobileNav = ({ isLoggedIn, userRole }: MobileNavProps) => {
               </Link>
               <Button
                 className="mt-2 bg-brand-500 hover:bg-brand-600"
-                render={<Link href="/register" onClick={close} />}
+                render={
+                  <Link href="/register?intent=place-venue" onClick={close} />
+                }
               >
                 Разместить зал
               </Button>

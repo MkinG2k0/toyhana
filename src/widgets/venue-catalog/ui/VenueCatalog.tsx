@@ -1,189 +1,114 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { VenueCard } from "@/entities/venue";
-import { VenueFilters } from "@/features/venue-search";
-import { EmptyState } from "@/shared/ui/EmptyState";
-import { Skeleton } from "@/shared/ui/skeleton";
+import { useCallback, useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/shared/ui/pagination";
-import { useVenues } from "@/entities/venue";
-import { pluralize } from "@/shared/lib/utils";
-import type {
-  VenueFilters as VenueFiltersType,
-  VenueSortOption,
-  VenueListResponse,
+  buildVenueCatalogSearchParams,
+  parseRawSearchParamsToVenueListParams,
+  venueListParamsSignature,
+  venueListParamsToFilters,
+  useVenues,
+  type VenueFilters,
+  type VenueListResponse,
 } from "@/entities/venue";
-
-const SORT_OPTIONS: { value: VenueSortOption; label: string }[] = [
-  { value: "popular", label: "Популярные" },
-  { value: "rating", label: "По рейтингу" },
-  { value: "price_asc", label: "Сначала дешевле" },
-  { value: "price_desc", label: "Сначала дороже" },
-  { value: "newest", label: "Новые" },
-];
-
-const DEFAULT_FILTERS: VenueFiltersType = {
-  page: 1,
-  sort: "popular",
-};
+import { VenueFilters as VenueFiltersPanel } from "@/features/venue-search";
+import { isVenueSortOption } from "../lib/sort-options";
+import { VenueCatalogHeader } from "./VenueCatalogHeader";
+import { VenueCatalogResults } from "./VenueCatalogResults";
 
 interface VenueCatalogProps {
   initialData?: VenueListResponse;
+  filtersSignature: string;
 }
 
-export const VenueCatalog = ({ initialData }: VenueCatalogProps) => {
-  const [filters, setFilters] = useState<VenueFiltersType>(DEFAULT_FILTERS);
+export const VenueCatalog = ({
+  initialData,
+  filtersSignature,
+}: VenueCatalogProps) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const listParams = useMemo(() => {
+    const raw: Record<string, string> = {};
+    searchParams.forEach((value, key) => {
+      raw[key] = value;
+    });
+    return parseRawSearchParamsToVenueListParams(raw);
+  }, [searchParams]);
+
+  const filters = useMemo(
+    () => venueListParamsToFilters(listParams),
+    [listParams],
+  );
+
+  const clientSignature = useMemo(
+    () => venueListParamsSignature(listParams),
+    [listParams],
+  );
+
+  const effectiveInitialData =
+    initialData && clientSignature === filtersSignature
+      ? initialData
+      : undefined;
 
   const { data, isLoading } = useVenues(filters, {
-    initialData:
-      filters.page === DEFAULT_FILTERS.page &&
-      filters.sort === DEFAULT_FILTERS.sort
-        ? initialData
-        : undefined,
+    initialData: effectiveInitialData,
   });
 
-  const handleFiltersChange = useCallback((newFilters: VenueFiltersType) => {
-    setFilters(newFilters);
-  }, []);
+  const replaceCatalogUrl = useCallback(
+    (next: VenueFilters) => {
+      const params = buildVenueCatalogSearchParams(next);
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [pathname, router],
+  );
 
-  const handleSortChange = useCallback((sort: string | null) => {
-    if (!sort) return;
-    setFilters((prev) => ({ ...prev, sort: sort as VenueSortOption, page: 1 }));
-  }, []);
+  const handleSortChange = useCallback(
+    (sort: string | null) => {
+      if (!sort || !isVenueSortOption(sort)) return;
+      replaceCatalogUrl({
+        ...filters,
+        sort,
+        page: 1,
+      });
+    },
+    [filters, replaceCatalogUrl],
+  );
 
-  const handlePageChange = useCallback((page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  const handlePageChange = useCallback(
+    (page: number) => {
+      replaceCatalogUrl({ ...filters, page });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+    [filters, replaceCatalogUrl],
+  );
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6">
-      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold md:text-3xl">
-            Банкетные залы
-          </h1>
-          {data && (
-            <p className="mt-1 text-sm text-muted-foreground">
-              {pluralize(data.total, "зал", "зала", "залов")}
-            </p>
-          )}
-        </div>
-        <Select onValueChange={handleSortChange} defaultValue={filters.sort}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Сортировка" />
-          </SelectTrigger>
-          <SelectContent>
-            {SORT_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <VenueCatalogHeader
+        totalCount={data?.total}
+        sort={filters.sort}
+        onSortChange={handleSortChange}
+      />
 
       <div className="flex gap-8">
         <div className="hidden lg:block">
-          <VenueFilters
+          <VenueFiltersPanel
             filters={filters}
-            onFiltersChange={handleFiltersChange}
+            onFiltersChange={replaceCatalogUrl}
           />
         </div>
 
         <div className="flex-1">
-          {isLoading ? (
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <VenueCardSkeleton key={i} />
-              ))}
-            </div>
-          ) : data && data.venues.length > 0 ? (
-            <>
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {data.venues.map((venue) => (
-                  <VenueCard key={venue.id} venue={venue} />
-                ))}
-              </div>
-
-              {data.totalPages > 1 && (
-                <Pagination className="mt-8">
-                  <PaginationContent>
-                    {data.page > 1 && (
-                      <PaginationItem>
-                        <PaginationPrevious
-                          onClick={() => handlePageChange(data.page - 1)}
-                          className="cursor-pointer"
-                        />
-                      </PaginationItem>
-                    )}
-                    {Array.from({ length: data.totalPages }, (_, i) => i + 1)
-                      .filter(
-                        (p) =>
-                          p === 1 ||
-                          p === data.totalPages ||
-                          Math.abs(p - data.page) <= 2,
-                      )
-                      .map((p) => (
-                        <PaginationItem key={p}>
-                          <PaginationLink
-                            isActive={p === data.page}
-                            onClick={() => handlePageChange(p)}
-                            className="cursor-pointer"
-                          >
-                            {p}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-                    {data.page < data.totalPages && (
-                      <PaginationItem>
-                        <PaginationNext
-                          onClick={() => handlePageChange(data.page + 1)}
-                          className="cursor-pointer"
-                        />
-                      </PaginationItem>
-                    )}
-                  </PaginationContent>
-                </Pagination>
-              )}
-            </>
-          ) : (
-            <EmptyState
-              title="Залы не найдены"
-              description="Попробуйте изменить параметры поиска или сбросить фильтры"
-            />
-          )}
+          <VenueCatalogResults
+            isLoading={isLoading}
+            data={data}
+            onPageChange={handlePageChange}
+          />
         </div>
       </div>
     </main>
   );
 };
-
-const VenueCardSkeleton = () => (
-  <div className="overflow-hidden rounded-xl border border-surface-200">
-    <Skeleton className="aspect-4/3 w-full" />
-    <div className="space-y-3 p-4">
-      <Skeleton className="h-5 w-3/4" />
-      <Skeleton className="h-4 w-1/2" />
-      <div className="flex gap-2">
-        <Skeleton className="h-6 w-16" />
-        <Skeleton className="h-6 w-16" />
-      </div>
-      <Skeleton className="h-6 w-24" />
-    </div>
-  </div>
-);

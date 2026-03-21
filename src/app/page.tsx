@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { Footer } from "@/widgets/layout";
 import { SearchBar } from "@/shared/ui/SearchBar";
-import { PostRegisterRoleSync } from "@/shared/ui/PostRegisterRoleSync";
+import { PostRegisterRoleSync } from "@/shared/ui/PostRegisterRoleSync"
+import { PostLoginIntentSync } from "@/shared/ui/PostLoginIntentSync";
 import { VenueCard } from "@/entities/venue";
 import { prisma } from "@/shared/lib/prisma";
 import {
@@ -25,7 +26,7 @@ export const revalidate = 3600;
 const getTopVenues = async (): Promise<VenueCardType[]> => {
   try {
     const venues = await prisma.venue.findMany({
-      where: { isActive: true },
+      where: { isActive: true, isApproved: true },
       orderBy: [{ isPremium: "desc" }, { averageRating: "desc" }],
       take: 6,
       select: {
@@ -88,7 +89,7 @@ const EVENT_TYPES = [
 ];
 
 interface HomePageProps {
-  searchParams: Promise<{ fromRegister?: string | string[] }>;
+  searchParams: Promise<{ fromRegister?: string | string[]; intent?: string }>;
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
@@ -98,10 +99,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <>
       <PostRegisterRoleSync fromRegister={params?.fromRegister} />
+      <PostLoginIntentSync intent={params?.intent} />
       <main>
         {/* Hero */}
         <section className="relative bg-brand-900 px-4 py-20 text-white md:py-32">
-          <div className="absolute inset-0 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center opacity-30" />
+          <div className="absolute inset-0 bg-cover bg-center opacity-30" />
           <div className="relative mx-auto max-w-4xl text-center">
             <h1 className="font-display text-3xl font-bold leading-tight md:text-5xl">
               Найдите идеальный зал для вашего торжества
@@ -114,10 +116,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </section>
 
         {/* Benefits */}
-        <section className="mx-auto max-w-7xl px-4 py-16">
+        <section className="mx-auto max-w-7xl px-4 py-8">
           <div className="grid gap-6 md:grid-cols-3">
             {BENEFITS.map((b) => (
-              <Card key={b.title} className="border-surface-200">
+              <Card key={b.title} className="border-surface-200 h-full">
                 <CardContent className="flex flex-col items-center p-6 text-center">
                   <div className="mb-4 rounded-full bg-brand-50 p-3">
                     <b.icon className="size-6 text-brand-500" />
@@ -134,7 +136,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
         {/* Top Venues */}
         {topVenues.length > 0 && (
-          <section className="bg-surface-50 px-4 py-16">
+          <section className="bg-surface-50 px-4 py-8">
             <div className="mx-auto max-w-7xl">
               <div className="mb-8 flex items-center justify-between">
                 <h2 className="font-display text-2xl font-bold md:text-3xl">
@@ -144,7 +146,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                   Все залы
                 </Button>
               </div>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {topVenues.map((venue) => (
                   <VenueCard key={venue.id} venue={venue} />
                 ))}
@@ -154,7 +156,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         )}
 
         {/* Event Types */}
-        <section className="mx-auto max-w-7xl px-4 py-16">
+        {/* <section className="mx-auto max-w-7xl px-4 py-8">
           <h2 className="mb-8 text-center font-display text-2xl font-bold md:text-3xl">
             По типу мероприятия
           </h2>
@@ -171,7 +173,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               </Link>
             ))}
           </div>
-        </section>
+        </section> */}
 
         {/* CTA for owners */}
         <section className="bg-brand-500 px-4 py-16 text-white">
@@ -187,7 +189,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               size="lg"
               variant="secondary"
               className="mt-6"
-              render={<Link href="/register" />}
+              render={<Link href="/register?intent=place-venue" />}
             >
               Разместить зал
             </Button>

@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { toast } from "sonner"
 import { Button } from "@/shared/ui/button"
@@ -15,28 +15,36 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/ui/card"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select"
+import { OptionsSelect, type SelectOption } from "@/shared/ui"
 import { PhoneInput } from "@/shared/ui/PhoneInput"
 import { GoogleSignInButton } from "@/shared/ui/GoogleSignInButton"
 
 type RegisterStep = "info" | "otp"
 
+const REGISTER_ROLE_OPTIONS: SelectOption[] = [
+  { value: "CLIENT", label: "Найти зал" },
+  { value: "OWNER", label: "Разместить зал" },
+]
+
 export const RegisterForm = () => {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const isPlaceVenueIntent = searchParams.get("intent") === "place-venue"
+
   const [step, setStep] = useState<RegisterStep>("info")
   const [phone, setPhone] = useState("")
   const [name, setName] = useState("")
-  const [role, setRole] = useState<"CLIENT" | "OWNER">("CLIENT")
+  const [role, setRole] = useState<"CLIENT" | "OWNER">(
+    isPlaceVenueIntent ? "OWNER" : "CLIENT"
+  )
   const [code, setCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
   const normalizedPhone = `+7${phone.replace(/\D/g, "").slice(-10)}`
+
+  const handleRoleChange = useCallback((v: string | null) => {
+    if (v === "CLIENT" || v === "OWNER") setRole(v)
+  }, [])
 
   const handleSendOtp = async () => {
     if (phone.replace(/\D/g, "").length < 10) {
@@ -105,7 +113,7 @@ export const RegisterForm = () => {
         return
       }
 
-      router.push("/")
+      router.push(isPlaceVenueIntent ? "/dashboard" : "/")
       router.refresh()
     } catch {
       toast.error("Ошибка соединения")
@@ -117,9 +125,13 @@ export const RegisterForm = () => {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle className="font-display text-2xl">Регистрация</CardTitle>
+        <CardTitle className="font-display text-2xl">
+          {isPlaceVenueIntent ? "Стать владельцем зала" : "Регистрация"}
+        </CardTitle>
         <CardDescription>
-          Создайте аккаунт для бронирования залов
+          {isPlaceVenueIntent
+            ? "Зарегистрируйтесь и подайте заявку на размещение зала"
+            : "Создайте аккаунт для бронирования залов"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -144,23 +156,18 @@ export const RegisterForm = () => {
                 disabled={isLoading}
               />
             </div>
-            <div className="space-y-2">
-              <Label>Вы хотите</Label>
-              <Select
-                value={role}
-                onValueChange={(v) => setRole(v as "CLIENT" | "OWNER")}
-              >
-                <SelectTrigger>
-                  <SelectValue>
-                    {role === "CLIENT" ? "Найти зал" : "Разместить зал"}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CLIENT">Найти зал</SelectItem>
-                  <SelectItem value="OWNER">Разместить зал</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {!isPlaceVenueIntent && (
+              <div className="space-y-2">
+                <Label>Вы хотите</Label>
+                <OptionsSelect
+                  value={role}
+                  onValueChange={handleRoleChange}
+                  options={REGISTER_ROLE_OPTIONS}
+                  placeholder="Выберите роль"
+                  className="w-full"
+                />
+              </div>
+            )}
             <Button
               className="w-full bg-brand-500 hover:bg-brand-600"
               onClick={handleSendOtp}
@@ -179,7 +186,14 @@ export const RegisterForm = () => {
             <GoogleSignInButton intentRole={role} disabled={isLoading} />
             <p className="text-center text-sm text-muted-foreground">
               Уже есть аккаунт?{" "}
-              <Link href="/login" className="text-brand-500 hover:underline">
+              <Link
+                href={
+                  isPlaceVenueIntent
+                    ? "/login?callbackUrl=%2F%3Fintent%3Dplace-venue"
+                    : "/login"
+                }
+                className="text-brand-500 hover:underline"
+              >
                 Войти
               </Link>
             </p>

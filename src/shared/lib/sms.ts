@@ -1,3 +1,5 @@
+import { SITE_NAME } from "./site"
+
 const SMS_RU_API_URL = "https://sms.ru/sms/send"
 
 interface SendSmsResult {
@@ -42,7 +44,10 @@ export const sendSms = async (
 }
 
 export const sendOtp = async (phone: string, code: string): Promise<SendSmsResult> => {
-  return sendSms(phone, `Тойхана: ваш код подтверждения — ${code}. Никому не сообщайте этот код.`)
+  return sendSms(
+    phone,
+    `${SITE_NAME}: ваш код подтверждения — ${code}. Никому не сообщайте этот код.`,
+  )
 }
 
 export const generateOtpCode = (): string => {

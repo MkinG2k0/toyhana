@@ -1,20 +1,21 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useSession } from "next-auth/react"
-import { Button } from "@/shared/ui/button"
-import { MobileNav } from "./MobileNav"
-import { UserMenu } from "./UserMenu"
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { SITE_NAME } from "@/shared/lib/site";
+import { Button } from "@/shared/ui/button";
+import { MobileNav } from "./MobileNav";
+import { UserMenu } from "./UserMenu";
 
 export const Header = () => {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-surface-200 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <span className="font-display text-xl font-bold text-brand-600">
-            Тойхана
+            {SITE_NAME}
           </span>
         </Link>
 
@@ -33,12 +34,21 @@ export const Header = () => {
               Мои бронирования
             </Link>
           )}
-          {session?.user?.role === "OWNER" && (
+          {(session?.user?.role === "OWNER" ||
+            session?.user?.role === "ADMIN") && (
             <Link
               href="/dashboard"
               className="text-sm font-medium text-foreground/80 transition-colors hover:text-brand-500"
             >
               Мой кабинет
+            </Link>
+          )}
+          {session?.user?.role === "ADMIN" && (
+            <Link
+              href="/admin"
+              className="text-sm font-medium text-foreground/80 transition-colors hover:text-brand-500"
+            >
+              Администрирование
             </Link>
           )}
         </nav>
@@ -48,15 +58,8 @@ export const Header = () => {
             <UserMenu user={session.user} />
           ) : (
             <div className="hidden md:flex md:items-center md:gap-2">
-              <Button variant="ghost" size="sm" render={<Link href="/login" />}>
+              <Button size="sm" render={<Link href="/login" />}>
                 Войти
-              </Button>
-              <Button
-                size="sm"
-                className="bg-brand-500 hover:bg-brand-600"
-                render={<Link href="/register" />}
-              >
-                Зарегистрироваться
               </Button>
             </div>
           )}
@@ -67,5 +70,5 @@ export const Header = () => {
         </div>
       </div>
     </header>
-  )
-}
+  );
+};

@@ -135,7 +135,24 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
     }
 
     const body = await req.json();
-    const { isActive } = body as { isActive?: boolean };
+    const { isActive, isApproved } = body as {
+      isActive?: boolean
+      isApproved?: boolean
+    };
+
+    if (isApproved !== undefined) {
+      if (result.user.role !== "ADMIN") {
+        return error("Только администратор может одобрять залы", 403);
+      }
+      if (typeof isApproved !== "boolean") {
+        return error("Некорректное значение isApproved");
+      }
+      const updated = await prisma.venue.update({
+        where: { id },
+        data: { isApproved },
+      });
+      return success(updated);
+    }
 
     if (typeof isActive !== "boolean") {
       return error("Некорректный статус зала");

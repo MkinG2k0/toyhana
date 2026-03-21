@@ -60,7 +60,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `Бронирование — ${venue.name} | Тойхана`,
+    title: `Бронирование — ${venue.name}`,
     description: `Оставить заявку на бронирование зала «${venue.name}» в Махачкале.`,
   };
 }

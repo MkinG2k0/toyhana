@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
 
     const where: Prisma.VenueWhereInput = {
       isActive: true,
+      isApproved: true,
       city,
       ...(district && { district }),
       ...(capacityMin && { capacityMax: { gte: capacityMin } }),
@@ -128,11 +129,14 @@ export async function POST(req: NextRequest) {
     const existing = await prisma.venue.findUnique({ where: { slug } })
     const finalSlug = existing ? `${slug}-${Date.now()}` : slug
 
+    const isApproved = result.user.role === "ADMIN"
+
     const venue = await prisma.venue.create({
       data: {
         ...data,
         slug: finalSlug,
         ownerId: result.user.id,
+        isApproved,
         photos:
           photos && photos.length > 0
             ? {

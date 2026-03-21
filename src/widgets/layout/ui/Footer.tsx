@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { SITE_NAME } from "@/shared/lib/site"
 
 export const Footer = () => {
   return (
@@ -7,7 +8,7 @@ export const Footer = () => {
         <div className="grid gap-8 md:grid-cols-3">
           <div>
             <span className="font-display text-lg font-bold text-brand-600">
-              Тойхана
+              {SITE_NAME}
             </span>
             <p className="mt-2 text-sm text-muted-foreground">
               Поиск и бронирование банкетных залов для свадеб и мероприятий в
@@ -36,7 +37,7 @@ export const Footer = () => {
           </div>
         </div>
         <div className="mt-8 border-t border-surface-200 pt-6 text-center text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} Тойхана. Все права защищены.
+          &copy; {new Date().getFullYear()} {SITE_NAME}. Все права защищены.
         </div>
       </div>
     </footer>

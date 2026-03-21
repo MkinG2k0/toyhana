@@ -1,27 +1,29 @@
-import Link from "next/link"
-import Image from "next/image"
-import { Badge } from "@/shared/ui/badge"
-import { Card } from "@/shared/ui/card"
-import { Star, Users, MapPin, Crown } from "lucide-react"
-import { formatPrice, cn } from "@/shared/lib/utils"
-import { VenueFeatureBadges } from "./VenueFeatureBadges"
+import Link from "next/link";
+import Image from "next/image";
+import { Badge } from "@/shared/ui/badge";
+import { Card } from "@/shared/ui/card";
+import { Star, Users, MapPin, Crown } from "lucide-react";
+import { formatPrice, cn } from "@/shared/lib/utils";
+import { VenueFeatureBadges } from "./VenueFeatureBadges";
 
-import type { VenueCard as VenueCardType } from "../model/types"
+import type { VenueCard as VenueCardType } from "../model/types";
 
 interface VenueCardProps {
-  venue: VenueCardType
-  className?: string
+  venue: VenueCardType;
+  className?: string;
 }
 
 export const VenueCard = ({ venue, className }: VenueCardProps) => {
-  const mainPhoto = venue.photos[0]?.url ?? "/images/placeholder/venue-1.jpg"
+  const mainPhoto = venue.photos[0]?.url ?? "/images/placeholder/venue-1.jpg";
 
   return (
-    <Link href={`/venues/${venue.slug}`}>
+    <Link
+      href={`/venues/${venue.slug}`}
+      className={cn("block h-full min-h-0", className)}
+    >
       <Card
         className={cn(
-          "group flex flex-col overflow-hidden border-surface-200 p-0 transition-shadow hover:shadow-lg",
-          className
+          "group flex h-full min-h-0 flex-col overflow-hidden border-surface-200 p-0 transition-shadow hover:shadow-lg",
         )}
       >
         <div className="relative aspect-4/3 overflow-hidden">
@@ -40,7 +42,7 @@ export const VenueCard = ({ venue, className }: VenueCardProps) => {
           )}
         </div>
 
-        <div className="flex flex-1 flex-col p-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-2 p-4">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-semibold leading-tight">{venue.name}</h3>
             {venue.reviewCount > 0 && (
@@ -63,12 +65,12 @@ export const VenueCard = ({ venue, className }: VenueCardProps) => {
             </p>
           )}
 
-          <div className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
+          <div className=" flex items-center gap-1 text-sm text-muted-foreground">
             <Users className="size-3.5" />
             {venue.capacityMin}–{venue.capacityMax} гостей
           </div>
 
-          <VenueFeatureBadges venue={venue} className="mt-3" limit={3} />
+          <VenueFeatureBadges venue={venue} limit={3} />
 
           <div className="mt-auto border-t border-surface-200 pt-3">
             <span className="text-lg font-bold text-brand-600">
@@ -79,5 +81,5 @@ export const VenueCard = ({ venue, className }: VenueCardProps) => {
         </div>
       </Card>
     </Link>
-  )
-}
+  );
+};

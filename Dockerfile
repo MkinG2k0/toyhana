@@ -21,33 +21,44 @@ COPY prisma.config.ts ./
 RUN mkdir -p src/shared/lib
 COPY src/shared/lib/database-url.ts ./src/shared/lib/database-url.ts
 
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm-store-wedding,target=/root/.local/share/pnpm/store \
+  pnpm install --frozen-lockfile
 
 FROM base AS builder
 RUN corepack enable && corepack prepare pnpm@9 --activate
 
-COPY . .
-RUN mkdir -p public
+COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+RUN mkdir -p src/shared/lib
+COPY src/shared/lib/database-url.ts ./src/shared/lib/database-url.ts
 COPY --from=deps /app/node_modules ./node_modules
 
 ARG DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/dummy?sslmode=disable
 ENV DATABASE_URL=$DATABASE_URL
 ENV NODE_ENV=production
 
-RUN pnpm exec prisma generate \
+COPY . .
+RUN mkdir -p public
+
+RUN --mount=type=cache,id=prisma-engines-wedding,target=/root/.cache/prisma \
+  --mount=type=cache,id=next-cache-wedding,target=/app/.next/cache \
+  pnpm exec prisma generate \
   && pnpm build
 
 FROM base AS migrator
 RUN corepack enable && corepack prepare pnpm@9 --activate
 
-COPY . .
+COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+RUN mkdir -p src/shared/lib
+COPY src/shared/lib/database-url.ts ./src/shared/lib/database-url.ts
 COPY --from=deps /app/node_modules ./node_modules
 
 ARG DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/dummy?sslmode=disable
 ENV DATABASE_URL=$DATABASE_URL
 ENV NODE_ENV=production
-
-RUN pnpm exec prisma generate
 
 CMD ["pnpm", "exec", "prisma", "migrate", "deploy"]
 

@@ -1,23 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
 import { Footer } from "@/widgets/layout";
 import { SearchBar } from "@/shared/ui/SearchBar";
 import { PostRegisterRoleSync } from "@/shared/ui/PostRegisterRoleSync";
 import { PostLoginIntentSync } from "@/shared/ui/PostLoginIntentSync";
 import { VenueCard } from "@/entities/venue";
 import { prisma } from "@/shared/lib/prisma";
-import {
-  Building2,
-  Star,
-  Clock,
-  Heart,
-  Gem,
-  PartyPopper,
-  Cake,
-  Briefcase,
-} from "lucide-react";
+import { Building2, Star, Clock, PartyPopper } from "lucide-react";
 
 import type { VenueCardData as VenueCardType } from "@/entities/venue";
 

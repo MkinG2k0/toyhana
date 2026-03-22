@@ -1,59 +1,67 @@
-FROM node:20-alpine AS base
-RUN apk add --no-cache libc6-compat openssl
+# syntax=docker/dockerfile:1
+
+FROM node:22-bookworm-slim AS base
 WORKDIR /app
 
-# ──────────────────────────────────────────
-# 1. Зависимости
-# ──────────────────────────────────────────
+RUN apt-get update -y \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+ENV NEXT_TELEMETRY_DISABLED=1
+
 FROM base AS deps
-COPY package*.json ./
-COPY prisma ./prisma/
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
-RUN npm ci
+ARG DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/dummy?sslmode=disable
+ENV DATABASE_URL=$DATABASE_URL
 
-# Генерируем Prisma Client под linux/alpine
-RUN npx prisma generate
+COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+RUN mkdir -p src/shared/lib
+COPY src/shared/lib/database-url.ts ./src/shared/lib/database-url.ts
 
-# ──────────────────────────────────────────
-# 2. Билд
-# ──────────────────────────────────────────
+RUN pnpm install --frozen-lockfile
+
 FROM base AS builder
-WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN mkdir -p public
+COPY --from=deps /app/node_modules ./node_modules
 
-# NEXT_PUBLIC_ переменные нужны на этапе билда
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ARG DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/dummy?sslmode=disable
+ENV DATABASE_URL=$DATABASE_URL
+ENV NODE_ENV=production
 
-# Чтобы next build не падал без реальной БД
-ENV NEXT_PHASE=phase-production-build
+RUN pnpm exec prisma generate \
+  && pnpm build
 
-RUN npm run build
+FROM base AS migrator
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
-# ──────────────────────────────────────────
-# 3. Продакшн образ
-# ──────────────────────────────────────────
-FROM node:20-alpine AS runner
-RUN apk add --no-cache openssl
-WORKDIR /app
+COPY . .
+COPY --from=deps /app/node_modules ./node_modules
 
+ARG DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/dummy?sslmode=disable
+ENV DATABASE_URL=$DATABASE_URL
+ENV NODE_ENV=production
+
+RUN pnpm exec prisma generate
+
+CMD ["pnpm", "exec", "prisma", "migrate", "deploy"]
+
+FROM base AS runner
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 nextjs
 
-# Копируем только нужное из builder
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Prisma: schema + сгенерированный клиент
-COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=deps /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/generated ./generated
 
 USER nextjs
 

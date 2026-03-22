@@ -1,33 +1,44 @@
 services:
+  # Локальная БД при необходимости: docker compose --profile local-db up -d postgres
+  postgres:
+    profiles: ["local-db"]
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: wedding
+      POSTGRES_PASSWORD: wedding
+      POSTGRES_DB: toykhana
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wedding -d toykhana"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
     ports:
       - "3000:3000"
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql://toykhana:toykhana_secret@postgres:5432/toykhana
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
+      NODE_ENV: production
 
-  postgres:
-    image: postgres:15-alpine
-    ports:
-      - "5432:5432"
+  db-migrate:
+    profiles: ["migrate"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrator
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: toykhana
-      POSTGRES_USER: toykhana
-      POSTGRES_PASSWORD: toykhana_secret
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U toykhana"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
+      NODE_ENV: production
 
 volumes:
   postgres_data:

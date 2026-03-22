@@ -18,11 +18,8 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const venues = await prisma.venue.findMany({
-    where: { isActive: true },
-    select: { id: true },
-  });
-  return venues.map((v) => ({ venueId: v.id }));
+  // ISR по первому запросу; без Prisma на этапе `next build` (Docker/CI).
+  return [];
 }
 
 const getVenue = async (venueId: string) => {

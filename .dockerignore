@@ -4,6 +4,12 @@ node_modules
 dist
 build
 *.log
+.env
+.env.*
+!.env.example
 .env*.local
 coverage
 .turbo
+generated
+.cursor
+.idea

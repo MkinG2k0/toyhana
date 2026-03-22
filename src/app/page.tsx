@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { Footer } from "@/widgets/layout";
 import { SearchBar } from "@/shared/ui/SearchBar";
-import { PostRegisterRoleSync } from "@/shared/ui/PostRegisterRoleSync"
+import { PostRegisterRoleSync } from "@/shared/ui/PostRegisterRoleSync";
 import { PostLoginIntentSync } from "@/shared/ui/PostLoginIntentSync";
 import { VenueCard } from "@/entities/venue";
 import { prisma } from "@/shared/lib/prisma";
@@ -77,16 +77,16 @@ const BENEFITS = [
   },
 ];
 
-const EVENT_TYPES = [
-  { label: "Свадьба", href: "/venues?eventType=WEDDING", icon: Heart },
-  { label: "Помолвка", href: "/venues?eventType=ENGAGEMENT", icon: Gem },
-  { label: "День рождения", href: "/venues?eventType=BIRTHDAY", icon: Cake },
-  {
-    label: "Корпоратив",
-    href: "/venues?eventType=CORPORATE",
-    icon: Briefcase,
-  },
-];
+// const EVENT_TYPES = [
+//   { label: "Свадьба", href: "/venues?eventType=WEDDING", icon: Heart },
+//   { label: "Помолвка", href: "/venues?eventType=ENGAGEMENT", icon: Gem },
+//   { label: "День рождения", href: "/venues?eventType=BIRTHDAY", icon: Cake },
+//   {
+//     label: "Корпоратив",
+//     href: "/venues?eventType=CORPORATE",
+//     icon: Briefcase,
+//   },
+// ];
 
 interface HomePageProps {
   searchParams: Promise<{ fromRegister?: string | string[]; intent?: string }>;
